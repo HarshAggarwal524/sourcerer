@@ -2,6 +2,7 @@ import json
 from main import load_or_build
 from src.keyword_search import build_bm25_index
 from src.fusion import hybrid_retrieve
+from src.stage3_rerank import rerank
 
 PDF_PATH = "/Users/harshaggarwal/Projects_4/sourcerer/data/testpdf.pdf"
 
@@ -11,13 +12,18 @@ def load_testset(path):
         return json.load(f)
 
 
-def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3):
+def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_rerank=False):
     hits = 0
     for item in testset:
         question = item["question"]
         correct_index = item["correct_chunk_index"]
 
-        results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=k)
+        if use_rerank:
+            candidates = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=30, candidate_k=30)
+            results = rerank(question, candidates, top_k=k)
+        else:
+            results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=k)
+
         retrieved_indices = [idx for idx, chunk, score in results]
 
         if correct_index in retrieved_indices:
@@ -26,14 +32,19 @@ def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3):
     return hits / len(testset)
 
 
-def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10):
+def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_rerank=False):
     reciprocal_ranks = []
 
     for item in testset:
         question = item["question"]
         correct_index = item["correct_chunk_index"]
 
-        results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=top_k)
+        if use_rerank:
+            candidates = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=30, candidate_k=30)
+            results = rerank(question, candidates, top_k=top_k)
+        else:
+            results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=top_k)
+
         retrieved_indices = [idx for idx, chunk, score in results]
 
         if correct_index in retrieved_indices:
@@ -45,10 +56,10 @@ def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10):
     return sum(reciprocal_ranks) / len(reciprocal_ranks)
 
 
-def run_eval(testset_path, chunks, embeddings, bm25_index, label):
+def run_eval(testset_path, chunks, embeddings, bm25_index, label, use_rerank=False):
     testset = load_testset(testset_path)
-    recall_3 = evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3)
-    mrr = evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10)
+    recall_3 = evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_rerank=use_rerank)
+    mrr = evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_rerank=use_rerank)
 
     print(f"--- {label} ({len(testset)} questions) ---")
     print(f"Recall@3: {recall_3:.4f}")
@@ -63,8 +74,19 @@ if __name__ == "__main__":
     bm25_index = build_bm25_index(chunks)
     print(f"Loaded {len(chunks)} chunks.\n")
 
-    results = []
-    results.append(run_eval("eval/testset_easy.json", chunks, embeddings, bm25_index, "Easy set"))
-    results.append(run_eval("eval/testset_hard.json", chunks, embeddings, bm25_index, "Hard set"))
-    results.append(run_eval("eval/testset_hardest.json", chunks, embeddings, bm25_index, "Hardest set"))
-    results.append(run_eval("eval/testset_ambiguous_experimental.json", chunks, embeddings, bm25_index, "Ambiguous Experimental set"))
+    testsets = [
+        ("eval/testset_easy.json", "Easy set"),
+        ("eval/testset_hard.json", "Hard set"),
+        ("eval/testset_hardest.json", "Hardest set"),
+        ("eval/testset_ambiguous_experimental.json", "Ambiguous Experimental set"),
+    ]
+
+    print("========== STAGE 2: Hybrid (BM25 + Vector + RRF) ==========\n")
+    stage2_results = []
+    for path, label in testsets:
+        stage2_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (Stage 2)", use_rerank=False))
+
+    print("========== STAGE 3: + Reranking ==========\n")
+    stage3_results = []
+    for path, label in testsets:
+        stage3_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (Stage 3)", use_rerank=True))
