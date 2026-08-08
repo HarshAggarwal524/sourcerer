@@ -82,3 +82,32 @@ These four sets (three official + one experimental) are the fixed yardstick ever
 subsequent stage (2: BM25+RRF, 3: reranking, 4: query rewriting, 5: grounding check)
 will be measured against. Same document, same questions, held constant throughout —
 isolates what each new technique actually contributes.
+
+### Stage 2 debugging note
+- Found BM25's keyword_search() was returning zero-score chunks to pad out
+  top_k, which then leaked into RRF fusion as false signal. Fixed by
+  filtering out any chunk with score == 0 before returning results.
+
+## Stage 2 — BM25 + RRF Hybrid Search
+
+### Results vs. Stage 1 baseline
+
+| Test set | Recall@3 (before → after) | MRR (before → after) |
+|---|---|---|
+| Easy | 0.8333 → 0.9667 | 0.7761 → 0.8881 |
+| Hard | 0.6897 → 0.7931 | 0.6357 → 0.7322 |
+| Hardest | 0.7273 → 0.5909 | 0.5671 → 0.5735 |
+| Ambiguous | 0.6207 → 0.5172 | 0.5270 → 0.5037 |
+
+### Observation
+BM25+RRF meaningfully improved Easy and Hard sets — questions with enough
+distinctive keyword overlap for keyword matching to reinforce/confirm what
+vector search found. It HURT Hardest and Ambiguous sets — these questions
+lack a single clean keyword anchor to the correct chunk, so BM25 confidently
+surfaces chunks with incidental word overlap that are actually wrong, and
+RRF's fusion trusts that signal enough to displace the correct chunk.
+
+This is a known real-world tradeoff of hybrid search: it helps most on
+literal/specific queries and can actively hurt on abstract/inferential ones.
+Worth considering in Stage 3 whether reranking (a more context-aware second
+pass) can recover the Hardest/Ambiguous performance lost here.
