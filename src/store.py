@@ -1,7 +1,7 @@
 import pickle
-from parse import extract_text
-from chunking import chunk_text
-from embed import embed_chunks
+from .parse import extract_text
+from .chunking import chunk_text
+from .embed import embed_chunks
 
 def save_data(chunks, embeddings, path="store.pkl"):
     """

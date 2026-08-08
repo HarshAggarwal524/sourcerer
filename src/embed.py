@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer
-from parse import extract_text
-from chunking import chunk_text
+from .parse import extract_text
+from .chunking import chunk_text
 
 # Load once at module level so it's not reloaded on every call
 model = SentenceTransformer("all-MiniLM-L6-v2")

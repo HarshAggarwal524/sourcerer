@@ -1,4 +1,4 @@
-from parse import extract_text
+from .parse import extract_text
 
 def chunk_text(text, chunk_size=300):
     """

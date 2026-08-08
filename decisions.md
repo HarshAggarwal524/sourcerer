@@ -40,3 +40,45 @@
   Absolute score is not reliable as a standalone confidence signal — relative
   ranking matters more. This motivates Stage 5's LLM-based grounding check
   over a simple similarity threshold.
+
+## Stage 1 — Report Card (Baseline)
+
+- Test document: data/testpdf.pdf (33 chunks, ~9-10k words, two NCERT history chapters:
+  Socialism in Europe/Russian Revolution, and The French Revolution)
+- Test sets: four tiers, all manually reviewed for correct/unambiguous ground truth
+  (except the experimental set, see below)
+
+### Sanity check
+- Verified scoring correctness by testing a random-chunk-selection baseline against
+  the easy test set: scored Recall@3 ≈ 0.07-0.10, matching theoretical chance
+  (3/33 ≈ 0.09). Confirms real pipeline's scores reflect genuine retrieval quality,
+  not a scoring bug.
+
+### Baseline results (plain vector search, Stage 0 pipeline)
+
+| Test set | Questions | Description | Recall@3 | MRR |
+|---|---|---|---|---|
+| Easy | 30 | Generated directly from chunks, high vocabulary overlap | 0.8333 | 0.7761 |
+| Hard | 29 | Paraphrased/synonym-based, vaguer natural phrasing | 0.6897 | 0.6357 |
+| Hardest | 22 | Multi-hop/inferential — combines two facts per chunk | 0.7273 | 0.5671 |
+| Ambiguous (experimental) | 29 | Deliberately vague/riddle-like — NOT used for stage comparisons, ground truth less reliable | 0.6207 | 0.5270 |
+
+### Key observations
+- Hard set shows the expected drop vs. Easy — plain vector search is measurably
+  worse at handling paraphrased/synonym-heavy questions.
+- Hardest set has HIGHER Recall@3 than Hard but LOWER MRR. Multi-hop questions
+  retain enough distinctive anchor details (names, numbers) to usually surface
+  the correct chunk somewhere in top 3, but rarely rank it #1, since no single
+  clean paraphrase match exists. This is a different failure mode than Hard set's
+  pure-paraphrasing problem (fewer ranking misses, more complete retrieval misses).
+- This predicts Stage 3 (reranking) may specifically help MRR on the Hardest set,
+  since reranking's job is fixing "found but ranked too low."
+- Ambiguous experimental set scored lowest as expected, but the drop was less
+  severe than anticipated — MiniLM embeddings appear reasonably robust to
+  semantic vagueness in general.
+
+### Why these baselines matter
+These four sets (three official + one experimental) are the fixed yardstick every
+subsequent stage (2: BM25+RRF, 3: reranking, 4: query rewriting, 5: grounding check)
+will be measured against. Same document, same questions, held constant throughout —
+isolates what each new technique actually contributes.

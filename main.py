@@ -2,35 +2,24 @@ import os
 import pickle
 import hashlib
 
-from parse import extract_text
-from chunking import chunk_text
-from embed import embed_chunks, embed_query
-from retrieve import retrieve
-from generate import generate_answer
+from src.parse import extract_text
+from src.chunking import chunk_text
+from src.embed import embed_chunks, embed_query
+from src.retrieve import retrieve
+from src.generate import generate_answer
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 
 
 def get_store_path(pdf_path, model_name):
-    """
-    Builds a cache filename based on a hash of (PDF content + model name).
-    Same PDF + same model -> same hash -> cache reused.
-    Same PDF + different model -> different hash -> treated as new.
-    """
     with open(pdf_path, "rb") as f:
         pdf_bytes = f.read()
-
     combined = pdf_bytes + model_name.encode("utf-8")
     hash_value = hashlib.sha256(combined).hexdigest()[:16]
-
-    return f"store_{hash_value}.pkl"
+    return f"cache/store_{hash_value}.pkl"
 
 
 def load_or_build(pdf_path, model_name=MODEL_NAME):
-    """
-    Loads cached chunks + embeddings if they exist for this (PDF, model) pair.
-    Otherwise runs parse -> chunk -> embed and saves the result.
-    """
     store_path = get_store_path(pdf_path, model_name)
 
     if os.path.exists(store_path):
@@ -58,7 +47,7 @@ def load_or_build(pdf_path, model_name=MODEL_NAME):
 
 
 def main():
-    pdf_path = "/Users/harshaggarwal/Projects_4/sourcerer/sampel.pdf"  # replace with your real path
+    pdf_path = "/Users/harshaggarwal/Projects_4/sourcerer/data/testpdf.pdf"
 
     try:
         chunks, embeddings = load_or_build(pdf_path)
@@ -77,11 +66,11 @@ def main():
 
         query_vec = embed_query(question)
         results = retrieve(query_vec, embeddings, chunks, top_k=1)
-        top_chunk, score = results[0]
+        top_index, top_chunk, score = results[0]   # <-- unpacking 3 values now
 
         answer = generate_answer(question, top_chunk)
 
-        print(f"\n(retrieved chunk, score {score:.4f})")
+        print(f"\n(retrieved chunk #{top_index}, score {score:.4f})")
         print(f"Answer: {answer}\n")
 
 

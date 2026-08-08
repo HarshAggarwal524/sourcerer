@@ -2,11 +2,11 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
-from parse import extract_text
-from chunking import chunk_text
-from embed import embed_chunks, embed_query
-from store import save_data, load_data
-from retrieve import retrieve
+from .parse import extract_text
+from .chunking import chunk_text
+from .embed import embed_chunks, embed_query
+from .store import save_data, load_data
+from .retrieve import retrieve
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -46,13 +46,13 @@ if __name__ == "__main__":
         chunks = data["chunks"]
         embeddings = data["embeddings"]
 
-    question = "What is phase 7 in the project?"  # replace with your real question
+    question = "What is phase 7 in the project?"
     query_vec = embed_query(question)
 
     results = retrieve(query_vec, embeddings, chunks, top_k=1)
-    top_chunk, score = results[0]
+    top_index, top_chunk, score = results[0]   # <-- now unpacking 3 values
 
-    print(f"Retrieved chunk (score {score:.4f}):\n{top_chunk[:200]}\n")
+    print(f"Retrieved chunk index {top_index} (score {score:.4f}):\n{top_chunk[:200]}\n")
 
     answer = generate_answer(question, top_chunk)
     print("Question asked:", question)
