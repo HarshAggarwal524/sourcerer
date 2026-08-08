@@ -1,5 +1,7 @@
-pypdf
-sentence-transformers
-numpy
-requests
-python-dotenv
+pypdf==6.15.0
+sentence-transformers==5.7.0
+numpy==2.5.1
+python-dotenv==1.2.2
+groq==1.6.0
+rank-bm25==0.2.2
+streamlit==1.61.1
