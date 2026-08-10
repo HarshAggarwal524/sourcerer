@@ -34,116 +34,158 @@
   expected, to be addressed by Stage 1 (report card) and Stage 2 (BM25).
 
 ### Stage 0 baseline observations
-- scores ranged ~0.05–0.43 on test questions, best chunk not always semantically correct
-- Observed: MiniLM cosine similarity scores are compressed into a narrow band
-  (~0.05 for unrelated, ~0.40-0.50 for relevant) rather than spanning 0-1.
-  Absolute score is not reliable as a standalone confidence signal — relative
-  ranking matters more. This motivates Stage 5's LLM-based grounding check
-  over a simple similarity threshold.
+- Scores ranged ~0.05–0.43 on test questions, best chunk not always semantically correct.
+- MiniLM cosine similarity scores are compressed into a narrow band (~0.05 for
+  unrelated, ~0.40-0.50 for relevant) rather than spanning 0-1. Absolute score
+  is not reliable as a standalone confidence signal — relative ranking matters more.
+  This motivates Stage 5's LLM-based grounding check over a simple similarity threshold.
+
+---
 
 ## Stage 1 — Report Card (Baseline)
 
-- Test document: data/testpdf.pdf (33 chunks, ~9-10k words, two NCERT history chapters:
-  Socialism in Europe/Russian Revolution, and The French Revolution)
-- Test sets: four tiers, all manually reviewed for correct/unambiguous ground truth
-  (except the experimental set, see below)
+### Test document
+- File: data/testpdf.pdf
+- Size: 33 chunks, ~9-10k words
+- Content: two NCERT history chapters — Socialism in Europe/Russian Revolution,
+  and The French Revolution
+
+### Test sets
+Four tiers built, all manually reviewed for correct/unambiguous ground truth
+(except the experimental set):
+
+| Test set | Questions | Description |
+|---|---|---|
+| Easy | 30 | Generated directly from chunks, high vocabulary overlap |
+| Hard | 29 | Paraphrased/synonym-based, vaguer natural phrasing |
+| Hardest | 22 | Multi-hop/inferential — combines two facts per chunk |
+| Ambiguous (experimental) | 29 | Deliberately vague/riddle-like — NOT used for stage comparisons, ground truth less reliable |
 
 ### Sanity check
-- Verified scoring correctness by testing a random-chunk-selection baseline against
-  the easy test set: scored Recall@3 ≈ 0.07-0.10, matching theoretical chance
-  (3/33 ≈ 0.09). Confirms real pipeline's scores reflect genuine retrieval quality,
-  not a scoring bug.
-
-### Baseline results (plain vector search, Stage 0 pipeline)
-
-| Test set | Questions | Description | Recall@3 | MRR |
-|---|---|---|---|---|
-| Easy | 30 | Generated directly from chunks, high vocabulary overlap | 0.8333 | 0.7761 |
-| Hard | 29 | Paraphrased/synonym-based, vaguer natural phrasing | 0.6897 | 0.6357 |
-| Hardest | 22 | Multi-hop/inferential — combines two facts per chunk | 0.7273 | 0.5671 |
-| Ambiguous (experimental) | 29 | Deliberately vague/riddle-like — NOT used for stage comparisons, ground truth less reliable | 0.6207 | 0.5270 |
+- Verified scoring correctness by testing a random-chunk-selection baseline:
+  scored Recall@3 ≈ 0.07-0.10, matching theoretical chance (3/33 ≈ 0.09).
+  Confirms real pipeline's scores reflect genuine retrieval quality, not a scoring bug.
 
 ### Key observations
-- Hard set shows the expected drop vs. Easy — plain vector search is measurably
-  worse at handling paraphrased/synonym-heavy questions.
-- Hardest set has HIGHER Recall@3 than Hard but LOWER MRR. Multi-hop questions
-  retain enough distinctive anchor details (names, numbers) to usually surface
-  the correct chunk somewhere in top 3, but rarely rank it #1, since no single
-  clean paraphrase match exists. This is a different failure mode than Hard set's
-  pure-paraphrasing problem (fewer ranking misses, more complete retrieval misses).
-- This predicts Stage 3 (reranking) may specifically help MRR on the Hardest set,
-  since reranking's job is fixing "found but ranked too low."
-- Ambiguous experimental set scored lowest as expected, but the drop was less
-  severe than anticipated — MiniLM embeddings appear reasonably robust to
-  semantic vagueness in general.
+- Hard set shows expected drop vs. Easy — plain vector search is measurably worse
+  at handling paraphrased/synonym-heavy questions.
+- Hardest set has HIGHER Recall@3 than Hard but LOWER MRR — multi-hop questions
+  retain enough distinctive anchor details to surface the correct chunk in top 3,
+  but rarely rank it #1. Different failure mode than Hard set's pure-paraphrasing problem.
+- Ambiguous experimental set scored lowest as expected, but the drop was less severe
+  than anticipated — MiniLM embeddings are reasonably robust to semantic vagueness.
+- These four sets are the fixed yardstick held constant throughout all subsequent
+  stages — isolates what each new technique actually contributes.
 
-### Why these baselines matter
-These four sets (three official + one experimental) are the fixed yardstick every
-subsequent stage (2: BM25+RRF, 3: reranking, 4: query rewriting, 5: grounding check)
-will be measured against. Same document, same questions, held constant throughout —
-isolates what each new technique actually contributes.
+### BM25 debugging note (discovered during Stage 2 build)
+- Found BM25's keyword_search() was returning zero-score chunks to pad out top_k,
+  which then leaked into RRF fusion as false signal. Fixed by filtering out any
+  chunk with score == 0 before returning results.
 
-### Stage 2 debugging note
-- Found BM25's keyword_search() was returning zero-score chunks to pad out
-  top_k, which then leaked into RRF fusion as false signal. Fixed by
-  filtering out any chunk with score == 0 before returning results.
+---
 
 ## Stage 2 — BM25 + RRF Hybrid Search
 
-### Results vs. Stage 1 baseline
-
-| Test set | Recall@3 (before → after) | MRR (before → after) |
-|---|---|---|
-| Easy | 0.8333 → 0.9667 | 0.7761 → 0.8881 |
-| Hard | 0.6897 → 0.7931 | 0.6357 → 0.7322 |
-| Hardest | 0.7273 → 0.5909 | 0.5671 → 0.5735 |
-| Ambiguous | 0.6207 → 0.5172 | 0.5270 → 0.5037 |
+### What was built
+- Added BM25 keyword search index (rank_bm25) alongside existing vector search.
+- Combined both ranked lists using Reciprocal Rank Fusion (RRF, k=60) —
+  rank-based merging that avoids incompatible score scales between BM25 and cosine similarity.
+- Tokenization: lowercase + strip punctuation before splitting — prevents "Bolshevik"
+  vs "bolshevik" mismatches and punctuation-adjacent token fragmentation.
 
 ### Observation
-BM25+RRF meaningfully improved Easy and Hard sets — questions with enough
-distinctive keyword overlap for keyword matching to reinforce/confirm what
-vector search found. It HURT Hardest and Ambiguous sets — these questions
-lack a single clean keyword anchor to the correct chunk, so BM25 confidently
-surfaces chunks with incidental word overlap that are actually wrong, and
-RRF's fusion trusts that signal enough to displace the correct chunk.
+BM25+RRF meaningfully improved Easy and Hard sets — questions with enough distinctive
+keyword overlap for keyword matching to reinforce what vector search found.
+It HURT Hardest and Ambiguous sets — these questions lack a clean keyword anchor,
+so BM25 confidently surfaces chunks with incidental word overlap that are actually
+wrong, and RRF trusts that signal enough to displace the correct chunk.
 
-This is a known real-world tradeoff of hybrid search: it helps most on
-literal/specific queries and can actively hurt on abstract/inferential ones.
-Worth considering in Stage 3 whether reranking (a more context-aware second
-pass) can recover the Hardest/Ambiguous performance lost here.
+Known real-world tradeoff of hybrid search: helps most on literal/specific queries,
+can actively hurt on abstract/inferential ones.
+
+---
 
 ## Stage 3 — Reranking (bge-reranker-v2-m3)
 
-Note: Run on Google Colab (GPU) due to local RAM constraints (8GB) —
-reranker requires ~9GB+ RAM to run comfortably alongside other processes.
-
-### Results vs. Stage 2
-
-| Test set | Recall@3 (S2 → S3) | MRR (S2 → S3) |
-|---|---|---|
-| Easy | 0.9667 → 1.0000 | 0.8881 → 1.0000 |
-| Hard | 0.7931 → 0.9310 | 0.7322 → 0.9262 |
-| Hardest | 0.5909 → 0.9091 | 0.5735 → 0.8157 |
-| Ambiguous | 0.5172 → 0.8276 | 0.5037 → 0.6882 |
+### What was built
+- Added cross-encoder reranker (BAAI/bge-reranker-v2-m3) as a second pass after
+  hybrid retrieval.
+- Retrieves a wider candidate pool (originally 30, later corrected to 12 — see
+  methodology note below), then reranker re-scores each candidate by reading the
+  question and chunk together as a pair.
+- Run on Google Colab (GPU) due to local RAM constraints (8GB local vs ~9GB+ needed).
 
 ### Observation
-Reranking improved EVERY test set on EVERY metric — unlike Stage 2's mixed
-results. Critically, the largest gains are exactly on the sets Stage 2 hurt
-(Hardest: +0.318 Recall@3, Ambiguous: +0.311 Recall@3), confirming the
-hypothesis from Stage 2: a cross-encoder reranker can recover correct chunks
-that BM25's keyword-overlap noise had buried in the fused ranking, because
-it directly reasons about question-chunk relevance rather than relying on
-proxy signals (embedding similarity or keyword overlap) that can be fooled.
+Reranking improved EVERY test set on EVERY metric — unlike Stage 2's mixed results.
+Largest gains on exactly the sets Stage 2 hurt (Hardest, Ambiguous), confirming the
+hypothesis: a cross-encoder can recover correct chunks that BM25's keyword noise had
+buried, because it directly reasons about relevance rather than relying on proxy signals.
+Easy set hitting 1.0/1.0 likely reflects a ceiling effect from test set construction,
+not evidence the retrieval problem is fully solved.
 
-Easy set reaching 1.0/1.0 likely reflects a ceiling effect from how that
-test set was constructed (questions generated directly from chunks), not
-evidence the retrieval problem is "solved" in general — Hard/Hardest/
-Ambiguous remain the more meaningful signals of real capability.
+### Methodology note: candidate pool size
+- Originally ran with candidate_pool=30 out of 33 total chunks — effectively feeding
+  the reranker almost the entire document, making upstream retrieval irrelevant.
+- Corrected to candidate_pool=12 in the final consolidated run (Stage 4 onwards) to
+  give retrieval genuine selectivity. Stage 3 numbers in the results table reflect
+  the corrected pool=12 run for fair comparison.
 
 ### Note for Stage 7
-Current test PDF is cleanly extracted text (from a digital source), not
-representative of real-world messy documents (scanned pages, images,
-multi-column layouts, sidebars/boxes, tables). Stage 7 should test the
-full pipeline against a genuinely messy version of the same or similar
-content to evaluate real-world extraction robustness, separate from the
-retrieval-quality work done in Stages 2-4.
+Current test PDF is cleanly extracted text from a digital source — not representative
+of real-world messy documents (scanned pages, images, multi-column layouts, sidebars,
+tables). Stage 7 should test the full pipeline against a genuinely messy PDF to
+evaluate real-world extraction robustness, separate from retrieval-quality work done
+in Stages 2-4.
+
+---
+
+## Stage 4 — HyDE (Hypothetical Document Embeddings)
+
+### What was built
+- Added a pre-retrieval query rewriting step: before searching, the LLM generates
+  a short hypothetical passage that *sounds like* it could answer the question,
+  styled as a document excerpt.
+- Embedding that passage instead of the raw question bridges the style gap between
+  questions (interrogative) and document chunks (declarative statements).
+- Both original question and hypothetical passage are logged for debugging.
+- Tested in two configurations:
+  - Stage 4a: HyDE alone (replaces plain hybrid retrieval, no reranking)
+  - Stage 4b: HyDE + Reranking (HyDE for candidate selection, then reranked)
+
+### Methodology note: candidate pool fix
+- First Stage 4b run used candidate_pool=30 (same bug as Stage 3) — produced
+  results identical to Stage 3, proving reranker was seeing the full corpus
+  regardless of retrieval method. Fixed to candidate_pool=12 for valid comparison.
+
+### Key finding: HyDE does NOT help once reranking is applied
+Comparing Stage 3 (rerank, pool=12) vs. Stage 4b (HyDE+rerank, pool=12):
+HyDE made Recall@3 worse on Hard/Hardest/Ambiguous. Likely cause: HyDE's
+rewritten query sometimes contains fabricated specifics (hallucinated dates/names
+not in the source document) which change which candidates reach the reranker —
+occasionally for the worse, since the reranker was already doing strong
+context-aware relevance judgment directly against the real question.
+
+HyDE is useful when reranking is NOT present (Stage 4a vs. Stage 2 shows
+real Recall gains on Hard/Hardest/Ambiguous), but adds no value — and sometimes
+mild harm — once a strong reranker is already in the pipeline.
+
+This is a legitimate, useful negative result: the pipeline's best configuration
+is Stage 3 (hybrid + reranking), not Stage 4b (HyDE + reranking).
+
+### Document-dependence caveat
+This PDF (clean, simple NCERT textbook prose) may not reveal HyDE's full benefit.
+HyDE helps most when there is a large vocabulary/style gap between questions and
+source text (e.g. dense academic papers, legal contracts, technical specs). A
+supplementary test on a harder document is flagged as a future exploratory task
+for Stage 11's "what I'd build next" section — not part of the main results.
+
+---
+
+## Final Pipeline Decision (post-Stage 4)
+
+**Active pipeline:** Stage 3 configuration — hybrid BM25+RRF retrieval →
+cross-encoder reranking (candidate_pool=12).
+
+**HyDE status:** built, tested, documented as document-dependent. Not enabled
+by default in the final pipeline since it showed no benefit on this document
+once reranking was present. Available as a configurable mode in score.py.
