@@ -17,7 +17,7 @@ def get_results(question, chunks, embeddings, bm25_index, k, use_hyde=False, use
     """
     Central retrieval dispatcher — picks the right pipeline based on flags.
     """
-    candidate_pool = 30 if use_rerank else k
+    candidate_pool = 12 if use_rerank else k
 
     if use_hyde:
         candidates = hyde_retrieve(question, chunks, embeddings, bm25_index, top_k=candidate_pool, candidate_k=candidate_pool)
