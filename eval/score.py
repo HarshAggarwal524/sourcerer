@@ -3,8 +3,9 @@ from main import load_or_build
 from src.keyword_search import build_bm25_index
 from src.fusion import hybrid_retrieve
 from src.stage3_rerank import rerank
+from src.stage4_hyde import hyde_retrieve
 
-PDF_PATH = "/Users/harshaggarwal/Projects_4/sourcerer/data/testpdf.pdf"
+PDF_PATH = "data/testpdf.pdf"
 
 
 def load_testset(path):
@@ -12,18 +13,30 @@ def load_testset(path):
         return json.load(f)
 
 
-def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_rerank=False):
+def get_results(question, chunks, embeddings, bm25_index, k, use_hyde=False, use_rerank=False):
+    """
+    Central retrieval dispatcher — picks the right pipeline based on flags.
+    """
+    candidate_pool = 30 if use_rerank else k
+
+    if use_hyde:
+        candidates = hyde_retrieve(question, chunks, embeddings, bm25_index, top_k=candidate_pool, candidate_k=candidate_pool)
+    else:
+        candidates = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=candidate_pool, candidate_k=candidate_pool)
+
+    if use_rerank:
+        return rerank(question, candidates, top_k=k)
+    else:
+        return candidates[:k]
+
+
+def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_hyde=False, use_rerank=False):
     hits = 0
     for item in testset:
         question = item["question"]
         correct_index = item["correct_chunk_index"]
 
-        if use_rerank:
-            candidates = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=30, candidate_k=30)
-            results = rerank(question, candidates, top_k=k)
-        else:
-            results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=k)
-
+        results = get_results(question, chunks, embeddings, bm25_index, k, use_hyde, use_rerank)
         retrieved_indices = [idx for idx, chunk, score in results]
 
         if correct_index in retrieved_indices:
@@ -32,19 +45,14 @@ def evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_reran
     return hits / len(testset)
 
 
-def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_rerank=False):
+def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_hyde=False, use_rerank=False):
     reciprocal_ranks = []
 
     for item in testset:
         question = item["question"]
         correct_index = item["correct_chunk_index"]
 
-        if use_rerank:
-            candidates = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=30, candidate_k=30)
-            results = rerank(question, candidates, top_k=top_k)
-        else:
-            results = hybrid_retrieve(question, chunks, embeddings, bm25_index, top_k=top_k)
-
+        results = get_results(question, chunks, embeddings, bm25_index, top_k, use_hyde, use_rerank)
         retrieved_indices = [idx for idx, chunk, score in results]
 
         if correct_index in retrieved_indices:
@@ -56,10 +64,10 @@ def evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_rerank=F
     return sum(reciprocal_ranks) / len(reciprocal_ranks)
 
 
-def run_eval(testset_path, chunks, embeddings, bm25_index, label, use_rerank=False):
+def run_eval(testset_path, chunks, embeddings, bm25_index, label, use_hyde=False, use_rerank=False):
     testset = load_testset(testset_path)
-    recall_3 = evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_rerank=use_rerank)
-    mrr = evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_rerank=use_rerank)
+    recall_3 = evaluate_recall_at_k(testset, chunks, embeddings, bm25_index, k=3, use_hyde=use_hyde, use_rerank=use_rerank)
+    mrr = evaluate_mrr(testset, chunks, embeddings, bm25_index, top_k=10, use_hyde=use_hyde, use_rerank=use_rerank)
 
     print(f"--- {label} ({len(testset)} questions) ---")
     print(f"Recall@3: {recall_3:.4f}")
@@ -81,12 +89,10 @@ if __name__ == "__main__":
         ("eval/testset_ambiguous_experimental.json", "Ambiguous Experimental set"),
     ]
 
-    print("========== STAGE 2: Hybrid (BM25 + Vector + RRF) ==========\n")
-    stage2_results = []
+    print("========== STAGE 4a: HyDE alone (compare to Stage 2) ==========\n")
     for path, label in testsets:
-        stage2_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (Stage 2)", use_rerank=False))
+        run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE only)", use_hyde=True, use_rerank=False)
 
-    print("========== STAGE 3: + Reranking ==========\n")
-    stage3_results = []
+    print("========== STAGE 4b: HyDE + Reranking (compare to Stage 3) ==========\n")
     for path, label in testsets:
-        stage3_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (Stage 3)", use_rerank=True))
+        run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE + Rerank)", use_hyde=True, use_rerank=True)

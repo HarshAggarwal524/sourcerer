@@ -111,3 +111,39 @@ This is a known real-world tradeoff of hybrid search: it helps most on
 literal/specific queries and can actively hurt on abstract/inferential ones.
 Worth considering in Stage 3 whether reranking (a more context-aware second
 pass) can recover the Hardest/Ambiguous performance lost here.
+
+## Stage 3 — Reranking (bge-reranker-v2-m3)
+
+Note: Run on Google Colab (GPU) due to local RAM constraints (8GB) —
+reranker requires ~9GB+ RAM to run comfortably alongside other processes.
+
+### Results vs. Stage 2
+
+| Test set | Recall@3 (S2 → S3) | MRR (S2 → S3) |
+|---|---|---|
+| Easy | 0.9667 → 1.0000 | 0.8881 → 1.0000 |
+| Hard | 0.7931 → 0.9310 | 0.7322 → 0.9262 |
+| Hardest | 0.5909 → 0.9091 | 0.5735 → 0.8157 |
+| Ambiguous | 0.5172 → 0.8276 | 0.5037 → 0.6882 |
+
+### Observation
+Reranking improved EVERY test set on EVERY metric — unlike Stage 2's mixed
+results. Critically, the largest gains are exactly on the sets Stage 2 hurt
+(Hardest: +0.318 Recall@3, Ambiguous: +0.311 Recall@3), confirming the
+hypothesis from Stage 2: a cross-encoder reranker can recover correct chunks
+that BM25's keyword-overlap noise had buried in the fused ranking, because
+it directly reasons about question-chunk relevance rather than relying on
+proxy signals (embedding similarity or keyword overlap) that can be fooled.
+
+Easy set reaching 1.0/1.0 likely reflects a ceiling effect from how that
+test set was constructed (questions generated directly from chunks), not
+evidence the retrieval problem is "solved" in general — Hard/Hardest/
+Ambiguous remain the more meaningful signals of real capability.
+
+### Note for Stage 7
+Current test PDF is cleanly extracted text (from a digital source), not
+representative of real-world messy documents (scanned pages, images,
+multi-column layouts, sidebars/boxes, tables). Stage 7 should test the
+full pipeline against a genuinely messy version of the same or similar
+content to evaluate real-world extraction robustness, separate from the
+retrieval-quality work done in Stages 2-4.
