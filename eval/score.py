@@ -89,10 +89,18 @@ if __name__ == "__main__":
         ("eval/testset_ambiguous_experimental.json", "Ambiguous Experimental set"),
     ]
 
+    all_results = []
+
     print("========== STAGE 4a: HyDE alone (compare to Stage 2) ==========\n")
     for path, label in testsets:
-        run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE only)", use_hyde=True, use_rerank=False)
+        all_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE only)", use_hyde=True, use_rerank=False))
 
     print("========== STAGE 4b: HyDE + Reranking (compare to Stage 3) ==========\n")
     for path, label in testsets:
-        run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE + Rerank)", use_hyde=True, use_rerank=True)
+        all_results.append(run_eval(path, chunks, embeddings, bm25_index, f"{label} (HyDE + Rerank)", use_hyde=True, use_rerank=True))
+
+    # Summary table
+    print("\n========== SUMMARY ==========")
+    print(f"{'Label':<45} {'Recall@3':<12} {'MRR':<12}")
+    for r in all_results:
+        print(f"{r['label']:<45} {r['recall@3']:<12.4f} {r['mrr']:<12.4f}")
