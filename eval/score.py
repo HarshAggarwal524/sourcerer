@@ -141,14 +141,14 @@ if __name__ == "__main__":
 
     all_results = []
 
-    # ── Recall + MRR for all stages ──────────────────────────────────────────
+'''  # ── Recall + MRR for all stages ──────────────────────────────────────────
     for mode, stage_label in stages:
         print(f"========== {stage_label} ==========\n")
         for path, set_label in testsets:
             label = f"{set_label} — {stage_label}"
             all_results.append(
                 run_eval(path, chunks, embeddings, bm25_index, mode, label, include_grounding=False)
-            )
+            ) '''
 
 # ── Grounding rate: Stage 3 and Stage 4b ─────────────────────────────────
 print("========== STAGE 5: Grounding Rate ==========\n")
