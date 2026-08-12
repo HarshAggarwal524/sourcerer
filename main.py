@@ -7,6 +7,9 @@ from src.chunking import chunk_text
 from src.embed import embed_chunks, embed_query
 from src.retrieve import retrieve
 from src.generate import generate_answer
+from src.stage5_trust import generate_trusted_answer
+
+
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 
@@ -68,10 +71,9 @@ def main():
         results = retrieve(query_vec, embeddings, chunks, top_k=1)
         top_index, top_chunk, score = results[0]   # <-- unpacking 3 values now
 
-        answer = generate_answer(question, top_chunk)
-
+        answer, confidence, verdict = generate_trusted_answer(question, top_chunk, generate_answer)
         print(f"\n(retrieved chunk #{top_index}, score {score:.4f})")
-        print(f"Answer: {answer}\n")
+        print(f"[{confidence}] {answer}\n")
 
 
 if __name__ == "__main__":

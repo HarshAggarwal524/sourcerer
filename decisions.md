@@ -183,9 +183,13 @@ for Stage 11's "what I'd build next" section — not part of the main results.
 
 ## Final Pipeline Decision (post-Stage 4)
 
-**Active pipeline:** Stage 3 configuration — hybrid BM25+RRF retrieval →
-cross-encoder reranking (candidate_pool=12).
+**Default pipeline:** Stage 3 — hybrid BM25+RRF → reranking (pool=12).
+Best overall Recall@3 across all sets.
 
-**HyDE status:** built, tested, documented as document-dependent. Not enabled
-by default in the final pipeline since it showed no benefit on this document
-once reranking was present. Available as a configurable mode in score.py.
+**HyDE caveat:** on Hardest and Ambiguous sets, Stage 4b (HyDE+rerank)
+shows better MRR than Stage 3 alone (0.787 vs 0.777 on Hardest,
+0.734 vs 0.697 on Ambiguous) — meaning when it finds the right chunk,
+it ranks it higher. The tradeoff is slightly lower Recall@3. HyDE is
+therefore document/query-type dependent: most useful on abstract,
+inferential, or vague questions where ranking quality matters more than
+coverage. Available as a configurable mode — not enabled by default.
