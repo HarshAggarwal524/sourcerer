@@ -193,3 +193,24 @@ it ranks it higher. The tradeoff is slightly lower Recall@3. HyDE is
 therefore document/query-type dependent: most useful on abstract,
 inferential, or vague questions where ranking quality matters more than
 coverage. Available as a configurable mode — not enabled by default.
+
+
+## Grounding Rate (Stage 5)
+
+| Test set | Stage 3 | Stage 4b (HyDE+Rerank) |
+|---|---|---|
+| Easy (30 Q) | 0.9667 | 0.9333 |
+| Hard (29 Q) | 0.6897 | 0.6897 |
+| Hardest (22 Q) | 0.3636 | 0.5455 |
+| Ambiguous (29 Q) | 0.3793 | 0.5862 |
+
+### Key finding
+Stage 3 has better Recall@3 on most sets. Stage 4b has meaningfully better
+grounding rate on Hardest and Ambiguous — HyDE's rewritten query tends to
+retrieve chunks that more closely match answer-style prose, leading the LLM
+to stay closer to the source text rather than inferring beyond it.
+
+Neither pipeline dominates: Stage 3 is better at finding the right chunk;
+Stage 4b produces more grounded answers on abstract/inferential questions.
+Final pipeline choice depends on whether retrieval coverage or answer
+faithfulness is prioritized for a given use case.

@@ -32,11 +32,10 @@ for stage-to-stage comparisons (ground truth less reliable).
 | S3 → S4b (HyDE+Rerank) | HyDE on top of reranking | Slightly worse on most sets — reranker already handles relevance well |
 
 ## Grounding Rate (Stage 5)
-*To be filled in after Stage 5 is complete.*
 
-| Test set | Grounding rate |
-|---|---|
-| Easy | — |
-| Hard | — |
-| Hardest | — |
-| Ambiguous | — |
+| Test set | Stage 3 | Stage 4b (HyDE+Rerank) |
+|---|---|---|
+| Easy (30 Q) | 0.9667 | 0.9333 |
+| Hard (29 Q) | 0.6897 | 0.6897 |
+| Hardest (22 Q) | 0.3636 | 0.5455 |
+| Ambiguous (29 Q) | 0.3793 | 0.5862 |
