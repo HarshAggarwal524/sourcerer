@@ -48,6 +48,23 @@ def hybrid_retrieve(query, chunks, embeddings, bm25_index, top_k=5, candidate_k=
     fused = reciprocal_rank_fusion(vector_results, keyword_results, k=60, top_k=top_k)
     return fused
 
+def hybrid_retrieve_chroma(query, query_embedding, collection, chunks, bm25_index, top_k=5, candidate_k=12):
+    """
+    Same as hybrid_retrieve() but uses Chroma for vector search
+    instead of numpy-based retrieve().
+    """
+    from src.stage6_store import chroma_retrieve
+    from src.keyword_search import keyword_search
+
+    # vector search via Chroma
+    vector_results = chroma_retrieve(query_embedding, collection, top_k=candidate_k)
+
+    # keyword search via BM25 (still uses raw chunks in memory)
+    keyword_results = keyword_search(query, chunks, bm25_index, top_k=candidate_k)
+
+    # fuse both ranked lists via RRF
+    fused = reciprocal_rank_fusion(vector_results, keyword_results, k=60, top_k=top_k)
+    return fused
 
 if __name__ == "__main__":
     from main import load_or_build
