@@ -214,3 +214,73 @@ Neither pipeline dominates: Stage 3 is better at finding the right chunk;
 Stage 4b produces more grounded answers on abstract/inferential questions.
 Final pipeline choice depends on whether retrieval coverage or answer
 faithfulness is prioritized for a given use case.
+
+## Stage 6 — Getting the Foundations Right
+
+### What was built
+- Replaced pickle-based storage (`src/store.py`) with Chroma, a proper local
+  vector database (`chromadb` library).
+- Chroma persists to `chroma_db/` directory automatically — no manual
+  save/load required, no binary pickle files.
+- Collection keyed by SHA-256 hash of (PDF bytes + model name), truncated
+  to 16 chars — same collision-avoidance logic as the old pickle cache key.
+  Same PDF + same model = same collection. Different PDF or model = different
+  collection, no stale data.
+- Added `hybrid_retrieve_chroma()` to `src/fusion.py` — same BM25+RRF fusion
+  logic as before, but uses Chroma for the vector search step instead of a
+  numpy embeddings array. BM25 keyword search still runs on raw chunks fetched
+  from Chroma via `collection.get()`.
+- Formalized two distinct functions in `main.py`:
+  - `process_document()` — parse → chunk → embed → ingest into Chroma
+  - `get_collection()` — load existing collection or process if missing.
+    This is the single entry point both `main.py` and `app.py` use.
+- `app.py` updated to use `get_collection()` and `hybrid_retrieve_chroma()`
+  instead of old `load_or_build()` and `retrieve()`.
+- Added `chroma_db/` to `.gitignore` — generated data, not source code,
+  same reasoning as `cache/`.
+
+### Architecture (data flow)
+PDF file
+→ extract_text() [src/parse.py]
+→ chunk_text() [src/chunking.py]
+→ embed_chunks() [src/embed.py]
+→ ingest_document() [src/stage6_store.py]
+→ Chroma (chroma_db/) [persistent local vector database]
+↓
+question
+→ embed_query() [src/embed.py]
+→ chroma_retrieve() [src/stage6_store.py] ← vector search via Chroma
+
+keyword_search() [src/keyword_search.py] ← BM25 keyword search
+→ reciprocal_rank_fusion() [src/fusion.py] ← RRF merges both lists
+→ rerank() [src/stage3_rerank.py] ← cross-encoder re-scores
+→ generate_answer() [src/generate.py] ← Groq LLM generates answer
+→ check_grounding() [src/stage5_trust.py] ← LLM judge verifies answer
+→ answer + confidence tag
+
+### Debugging note
+- First Colab run produced a stale/corrupted Chroma collection that always
+  returned chunk #22 regardless of query. Fixed by deleting `chroma_db/`
+  and rebuilding fresh. Root cause: earlier broken ingestion run had left
+  a partial collection. `ingest_document()` now checks for existing
+  collections before creating, but doesn't validate their integrity —
+  a known limitation at this scale.
+
+### Known limitations
+- `chroma_db/` is local only — not persisted across Colab sessions.
+  Must rebuild on each fresh Colab run (fast, ~seconds for this document).
+- BM25 index still rebuilt in memory on every run — not stored in Chroma.
+  Acceptable for this document size; would need separate persistence at scale.
+- Multi-document search not yet implemented — each PDF gets its own
+  Chroma collection, no cross-document querying. Revisit if project
+  expands to multi-document support.
+- No collection integrity check on load — if a collection exists but was
+  partially written (e.g. interrupted ingestion), it will be loaded as-is
+  without error. Fix: store chunk count in collection metadata and verify
+  on load.
+
+### Verified end-to-end on Colab (GPU)
+- Louis XVI → Chunk #19, reranker score 0.5062, HIGH CONFIDENCE ✅
+- Reign of Terror → Chunk #27, reranker score 0.9262, HIGH CONFIDENCE ✅
+- Jacobins → Chunk #26, reranker score 0.4299, HIGH CONFIDENCE ✅
+- Capital of Australia → Chunk #5, reranker score 0.0013, LOW CONFIDENCE ✅

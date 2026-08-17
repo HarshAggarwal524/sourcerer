@@ -66,6 +66,36 @@ def hybrid_retrieve_chroma(query, query_embedding, collection, chunks, bm25_inde
     fused = reciprocal_rank_fusion(vector_results, keyword_results, k=60, top_k=top_k)
     return fused
 
+def expand_chunks(top_results, all_chunks, neighbors=1):
+    """
+    Takes top reranked results and expands each with neighboring chunks.
+    For each top chunk, includes `neighbors` chunks on each side.
+    Deduplicates and preserves order (sorted by chunk index).
+    
+    top_results: list of (index, chunk, score) from rerank()
+    all_chunks: full list of all chunks (from collection.get())
+    neighbors: how many neighbors on each side (default 1)
+    
+    Returns: list of (index, chunk_text) tuples, sorted by index
+    """
+    total_chunks = len(all_chunks)
+    seen_indices = set()
+    expanded = []
+
+    for idx, chunk, score in top_results:
+        # get window around this chunk
+        start = max(0, idx - neighbors)
+        end = min(total_chunks - 1, idx + neighbors)
+
+        for i in range(start, end + 1):
+            if i not in seen_indices:
+                seen_indices.add(i)
+                expanded.append((i, all_chunks[i]))
+
+    # sort by chunk index so context reads in document order
+    expanded.sort(key=lambda x: x[0])
+    return expanded
+
 if __name__ == "__main__":
     from main import load_or_build
     from src.embed import embed_query
