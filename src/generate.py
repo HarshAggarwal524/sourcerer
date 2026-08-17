@@ -11,7 +11,7 @@ from .retrieve import retrieve
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def generate_answer(question, context_chunk, model="llama-3.1-8b-instant"):
+def generate_answer(question, context_chunk, model="groq/compound-mini"):
     """
     Sends the question + context to Groq's LLM and returns the answer text.
     """

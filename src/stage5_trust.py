@@ -6,7 +6,7 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
-def check_grounding(question, context_chunk, answer, model="llama-3.1-8b-instant"):
+def check_grounding(question, context_chunk, answer, model="groq/compound-mini"):
     """
     LLM-as-judge: checks whether the generated answer is fully supported
     by the source chunk, with no information added from outside it.
@@ -44,7 +44,7 @@ def check_grounding(question, context_chunk, answer, model="llama-3.1-8b-instant
         return "NOT_SUPPORTED"
 
 
-def generate_trusted_answer(question, context_chunk, generate_fn):
+def generate_trusted_answer(question, context_chunks, generate_fn, model="groq/compound-mini"):
     """
     Generates an answer and then verifies it against the source chunk.
     Returns: (final_answer, confidence_tag, verdict)

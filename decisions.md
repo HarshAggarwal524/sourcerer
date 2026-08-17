@@ -284,3 +284,9 @@ keyword_search() [src/keyword_search.py] ← BM25 keyword search
 - Reign of Terror → Chunk #27, reranker score 0.9262, HIGH CONFIDENCE ✅
 - Jacobins → Chunk #26, reranker score 0.4299, HIGH CONFIDENCE ✅
 - Capital of Australia → Chunk #5, reranker score 0.0013, LOW CONFIDENCE ✅
+
+### Model update (Stage 7)
+- llama-3.1-8b-instant deprecated by Groq
+- Switched to groq/compound-mini — fast, direct answers, no thinking tokens
+- Other working options on current Groq account: allam-2-7b, qwen/qwen3.6-27b,
+  openai/gpt-oss-20b, openai/gpt-oss-120b
