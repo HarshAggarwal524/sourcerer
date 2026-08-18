@@ -1,6 +1,7 @@
 import hashlib
 import chromadb
 from chromadb.config import Settings
+from src.config import EMBEDDING_MODEL
 
 # Chroma persists to this local directory automatically
 CHROMA_PATH = "chroma_db"
@@ -117,7 +118,7 @@ if __name__ == "__main__":
     chunks = chunk_text(text, chunk_size=300)
     embeddings = embed_chunks(chunks)
 
-    collection = ingest_document(pdf_path, chunks, embeddings, MODEL_NAME)
+    collection = ingest_document(pdf_path, chunks, embeddings, EMBEDDING_MODEL)
 
     # query
     question = "What was the name of the cooperative community Robert Owen built?"

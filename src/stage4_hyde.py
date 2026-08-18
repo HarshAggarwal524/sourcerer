@@ -5,12 +5,13 @@ from groq import Groq
 from src.embed import embed_query
 from src.keyword_search import build_bm25_index
 from src.fusion import hybrid_retrieve
+from src.config import LLM_MODEL
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
-def generate_hypothetical_answer(question, model="groq/compound-mini"):
+def generate_hypothetical_answer(question, model=LLM_MODEL):
     """
     Asks the LLM to write a short, plausible passage that would answer
     the question, styled like an excerpt from the source document.

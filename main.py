@@ -9,11 +9,11 @@ from src.stage5_trust import generate_trusted_answer
 from src.generate import generate_answer
 from src.stage6_store import ingest_document, load_collection
 from src.fusion import hybrid_retrieve_chroma, expand_chunks
+from src.config import EMBEDDING_MODEL
 
-MODEL_NAME = "all-MiniLM-L6-v2"
 
 
-def process_document(pdf_path, model_name=MODEL_NAME):
+def process_document(pdf_path, model_name=EMBEDDING_MODEL):
     """
     Parses, chunks, embeds and stores a PDF into Chroma.
     Safe to call multiple times — skips if already ingested.
@@ -29,7 +29,7 @@ def process_document(pdf_path, model_name=MODEL_NAME):
     return collection
 
 
-def get_collection(pdf_path, model_name=MODEL_NAME):
+def get_collection(pdf_path, model_name=EMBEDDING_MODEL):
     """
     Returns the Chroma collection for this PDF, processing it first if needed.
     Single entry point for both main.py and app.py.

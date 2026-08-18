@@ -1,7 +1,8 @@
 from sentence_transformers import CrossEncoder
+from src.config import RERANKER_MODEL
 
 # Loaded once at module level, same reasoning as your embedding model in Stage 0
-reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
+reranker = CrossEncoder(RERANKER_MODEL)
 
 
 def rerank(query, candidates, top_k=5):

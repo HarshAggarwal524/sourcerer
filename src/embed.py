@@ -1,9 +1,11 @@
 from sentence_transformers import SentenceTransformer
 from .parse import extract_text
 from .chunking import chunk_text
+from src.config import EMBEDDING_MODEL
+
 
 # Load once at module level so it's not reloaded on every call
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(EMBEDDING_MODEL)
 
 def embed_chunks(chunks):
     """

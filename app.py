@@ -2,7 +2,7 @@ import os
 import tempfile
 import streamlit as st
 
-from main import get_collection, MODEL_NAME
+from main import get_collection
 from src.embed import embed_query
 from src.keyword_search import build_bm25_index
 from src.stage3_rerank import rerank

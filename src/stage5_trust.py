@@ -1,12 +1,13 @@
 import os
 from dotenv import load_dotenv
 from groq import Groq
+from src.config import LLM_MODEL
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
-def check_grounding(question, context_chunks, answer, model="groq/compound-mini"):
+def generate_trusted_answer(question, context_chunks, generate_fn, model=LLM_MODEL):
     """
     LLM-as-judge: checks whether the generated answer is fully supported
     by the source chunks, with no information added from outside them.
@@ -61,7 +62,7 @@ def generate_trusted_answer(question, context_chunks, generate_fn, model="groq/c
         return "Could not generate an answer.", "LOW CONFIDENCE", "NOT_SUPPORTED"
 
     verdict = check_grounding(question, context_chunks, answer)
-
+    
     if verdict == "SUPPORTED":
         return answer, "HIGH CONFIDENCE", verdict
     else:
