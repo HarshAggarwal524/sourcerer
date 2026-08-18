@@ -2,59 +2,71 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
-from .parse import extract_text
-from .chunking import chunk_text
-from .embed import embed_chunks, embed_query
-from .store import save_data, load_data
-from .retrieve import retrieve
-
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def generate_answer(question, context_chunk, model="groq/compound-mini"):
+
+def check_grounding(question, context_chunks, answer, model="groq/compound-mini"):
     """
-    Sends the question + context to Groq's LLM and returns the answer text.
+    LLM-as-judge: checks whether the generated answer is fully supported
+    by the source chunks, with no information added from outside them.
+    Returns "SUPPORTED" or "NOT_SUPPORTED".
+    context_chunks: either a single string or a list of strings.
     """
+    if isinstance(context_chunks, list):
+        context = "\n\n---\n\n".join(context_chunks)
+    else:
+        context = context_chunks
+
     prompt = (
-        "Answer the question using only the following context. "
-        "If the answer isn't in the context, say so clearly instead of guessing.\n\n"
-        f"Context: {context_chunk}\n\n"
-        f"Question: {question}"
+        "You are a strict fact-checker. Your job is to determine whether an answer "
+        "is fully supported by a given source passage.\n\n"
+        "Rules:\n"
+        "- Reply SUPPORTED only if every specific claim in the answer is directly "
+        "stated in the source passage.\n"
+        "- Reply NOT_SUPPORTED if the answer contains any information, inference, "
+        "or detail not explicitly present in the source passage.\n"
+        "- Reply NOT_SUPPORTED if the answer says there is insufficient information "
+        "or that the question cannot be answered.\n"
+        "- Reply with ONLY the word SUPPORTED or NOT_SUPPORTED. Nothing else.\n\n"
+        f"Source passage:\n{context}\n\n"
+        f"Question:\n{question}\n\n"
+        f"Answer:\n{answer}"
     )
 
     try:
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
+            temperature=0,
         )
-        return response.choices[0].message.content
+        verdict = response.choices[0].message.content.strip().upper()
+        if verdict not in ("SUPPORTED", "NOT_SUPPORTED"):
+            return "NOT_SUPPORTED"
+        return verdict
     except Exception as e:
-        print(f"[generate.py] LLM call failed: {e}")
-        return None
+        print(f"[stage5_trust.py] Grounding check failed: {e}")
+        return "NOT_SUPPORTED"
 
 
-if __name__ == "__main__":
-    test_path = "/Users/harshaggarwal/Projects_4/sourcerer/sampel.pdf"  # replace with your real path
+def generate_trusted_answer(question, context_chunks, generate_fn, model="groq/compound-mini"):
+    """
+    Generates an answer and verifies it against the source chunks.
+    context_chunks: either a single string or a list of strings.
+    Returns: (final_answer, confidence_tag, verdict)
+    """
+    answer = generate_fn(question, context_chunks)
 
-    data = load_data()
-    if data is None:
-        text = extract_text(test_path)
-        chunks = chunk_text(text, chunk_size=300)
-        embeddings = embed_chunks(chunks)
-        save_data(chunks, embeddings)
+    if not answer:
+        return "Could not generate an answer.", "LOW CONFIDENCE", "NOT_SUPPORTED"
+
+    verdict = check_grounding(question, context_chunks, answer)
+
+    if verdict == "SUPPORTED":
+        return answer, "HIGH CONFIDENCE", verdict
     else:
-        chunks = data["chunks"]
-        embeddings = data["embeddings"]
-
-    question = "What is phase 7 in the project?"
-    query_vec = embed_query(question)
-
-    results = retrieve(query_vec, embeddings, chunks, top_k=1)
-    top_index, top_chunk, score = results[0]   # <-- now unpacking 3 values
-
-    print(f"Retrieved chunk index {top_index} (score {score:.4f}):\n{top_chunk[:200]}\n")
-
-    answer = generate_answer(question, top_chunk)
-    print("Question asked:", question)
-    print("Answer:")
-    print(answer)
+        return (
+            "I could not find sufficient information in the source text to answer this question confidently.",
+            "LOW CONFIDENCE",
+            verdict,
+        )
