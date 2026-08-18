@@ -10,7 +10,7 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
-def generate_hypothetical_answer(question, model="llama-3.1-8b-instant"):
+def generate_hypothetical_answer(question, model="groq/compound-mini"):
     """
     Asks the LLM to write a short, plausible passage that would answer
     the question, styled like an excerpt from the source document.
