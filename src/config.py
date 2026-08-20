@@ -3,7 +3,7 @@
 
 # LLM used for answer generation and grounding checks
 LLM_PROVIDER = "gemini"
-LLM_MODEL = "gemini-3.6-flash"
+LLM_MODEL = "gemini-3.1-flash-lite"
 
 # Embedding model for chunks and queries
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
