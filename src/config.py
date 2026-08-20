@@ -2,7 +2,8 @@
 # Change model names here — they'll propagate everywhere automatically.
 
 # LLM used for answer generation and grounding checks
-LLM_MODEL = "groq/compound-mini"
+LLM_PROVIDER = "gemini"
+LLM_MODEL = "gemini-3.6-flash"
 
 # Embedding model for chunks and queries
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
