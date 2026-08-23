@@ -84,9 +84,9 @@ def generate_trusted_answer(
             verdict
         )
 
+    # fixed — shows the answer with a warning label
     return (
-        "I could not find sufficient information in the source text "
-        "to answer this question confidently.",
+        answer,
         "LOW CONFIDENCE",
         verdict
     )
