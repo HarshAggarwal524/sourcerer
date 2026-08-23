@@ -290,3 +290,52 @@ keyword_search() [src/keyword_search.py] ← BM25 keyword search
 - Switched to groq/compound-mini — fast, direct answers, no thinking tokens
 - Other working options on current Groq account: allam-2-7b, qwen/qwen3.6-27b,
   openai/gpt-oss-20b, openai/gpt-oss-120b
+
+
+## Stage 7 — Handling Bigger, Messier Files
+
+### Test documents
+1. Clean digital PDF (data/testpdf.pdf) — 33 chunks, baseline document
+2. Full NCERT Class 9 History textbook (class_9_history.pdf) — 217 chunks,
+   real-world messy PDF with figures, tables, cartoons, multi-column layouts,
+   index, decorative cover page
+
+### Findings from messy PDF test
+- Cover page (chunk #0): severely garbled — decorative title text repeated 5x
+  due to multi-column/decorative layout. Not a crash, just bad chunk content.
+  Harmless in practice since it never scores well on real queries.
+- Figure captions bleeding into chunks (e.g. "Fig.9 –" mid-sentence) — pipeline
+  handles gracefully, LLM ignores caption noise and extracts real content.
+- 217 chunks processed correctly, answers were accurate with appropriate
+  HIGH/LOW CONFIDENCE tags on test questions.
+- Broad questions ("What was the French Revolution?") correctly returned
+  LOW CONFIDENCE when no single chunk window fully covered the answer —
+  Stage 5 grounding check working correctly on real-world content.
+
+### Guardrails added to src/parse.py
+- MAX_PAGES = 150 — rejects PDFs over 150 pages with clear error message
+- MAX_FILE_SIZE_MB = 50 — rejects files over 50MB
+- MIN_CHARS_PER_PAGE = 100 — detects likely scanned/image PDFs and rejects
+  with a specific "scanned PDF not supported" message instead of silently
+  producing empty chunks
+- app.py already calls check_file_limits() before processing
+
+### Known limitations (documented)
+- Scanned/image-only PDFs not supported (no OCR) — Stage 7 detects and rejects
+- Cover pages with decorative/repeated text produce garbage chunks — not fixed,
+  noted as acceptable since these chunks never rank highly in retrieval
+- Figure captions bleed into text chunks — not fixed, LLM handles gracefully
+- Files over 150 pages or 50MB rejected — configurable in parse.py constants
+
+
+### Additional test: research paper PDF
+- Tested against a complex academic research paper with [describe: two-column
+  layout / mathematical equations / dense tables / etc.]
+- Result: [describe what broke — garbled extraction / wrong answers /
+  empty chunks / etc.]
+- Root cause: pypdf extracts text in reading order based on PDF coordinate
+  positions, which breaks on multi-column layouts — columns get merged
+  horizontally rather than read top-to-bottom per column.
+- Decision: document as a known limitation, not fixed at this stage.
+  Proper fix would require a more sophisticated PDF parser (e.g. pdfplumber,
+  pymupdf) or OCR pipeline — flagged for "what I'd build next" in Stage 11.
