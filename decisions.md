@@ -325,17 +325,4 @@ keyword_search() [src/keyword_search.py] ← BM25 keyword search
 - Cover pages with decorative/repeated text produce garbage chunks — not fixed,
   noted as acceptable since these chunks never rank highly in retrieval
 - Figure captions bleed into text chunks — not fixed, LLM handles gracefully
-- Files over 150 pages or 50MB rejected — configurable in parse.py constants
-
-
-### Additional test: research paper PDF
-- Tested against a complex academic research paper with [describe: two-column
-  layout / mathematical equations / dense tables / etc.]
-- Result: [describe what broke — garbled extraction / wrong answers /
-  empty chunks / etc.]
-- Root cause: pypdf extracts text in reading order based on PDF coordinate
-  positions, which breaks on multi-column layouts — columns get merged
-  horizontally rather than read top-to-bottom per column.
-- Decision: document as a known limitation, not fixed at this stage.
-  Proper fix would require a more sophisticated PDF parser (e.g. pdfplumber,
-  pymupdf) or OCR pipeline — flagged for "what I'd build next" in Stage 11.
+- Files over 150 pages or 50MB rejected — configurable in parse.py constantsz
