@@ -1,8 +1,8 @@
 venv/
 .env
 __pycache__/
-
+*.pkl
 *.npy
-cache/store_c7f8cbe4d158129d.pkl
-store.pkl
-chroma_db/.DS_Store
+cache/
+chroma_db/
+.DS_Store
