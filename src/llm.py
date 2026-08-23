@@ -47,3 +47,27 @@ def generate_llm(prompt, model=LLM_MODEL):
         raise ValueError(
             f"Unsupported LLM provider: {LLM_PROVIDER}"
         )
+        
+def stream_llm(prompt, model=LLM_MODEL):
+    """
+    Streams the LLM response token by token.
+    Yields text chunks as they arrive.
+    Only implemented for Gemini — Groq fallback yields full response at once.
+    """
+    if LLM_PROVIDER == "gemini":
+        from google import genai
+
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+        for chunk in client.models.generate_content_stream(
+            model=model,
+            contents=prompt,
+        ):
+            if chunk.text:
+                yield chunk.text
+
+    elif LLM_PROVIDER == "groq":
+        # Groq streaming exists but for simplicity, yield full response at once
+        result = generate_llm(prompt, model)
+        if result:
+            yield result
