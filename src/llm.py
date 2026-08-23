@@ -71,3 +71,33 @@ def stream_llm(prompt, model=LLM_MODEL):
         result = generate_llm(prompt, model)
         if result:
             yield result
+            
+def rewrite_query(question, history, model=LLM_MODEL):
+    """
+    Rewrites a question using conversation history to resolve
+    ambiguous references like "he", "it", "that", "them".
+    Returns a standalone question with full context filled in.
+    If no rewrite is needed, returns the original question unchanged.
+    """
+    if not history:
+        return question
+
+    history_text = "\n".join(
+        f"Q: {q}\nA: {a}" for q, a in history
+    )
+
+    prompt = (
+        "You are a query rewriter. Given a conversation history and a follow-up question, "
+        "rewrite the follow-up question to be fully self-contained — "
+        "resolving any pronouns or references using the history.\n"
+        "If the question is already self-contained, return it unchanged.\n"
+        "Return ONLY the rewritten question. No explanation, no preamble.\n\n"
+        f"Conversation history:\n{history_text}\n\n"
+        f"Follow-up question: {question}"
+    )
+
+    try:
+        return generate_llm(prompt, model).strip()
+    except Exception as e:
+        print(f"[llm.py] Query rewrite failed: {e}")
+        return question

@@ -11,7 +11,7 @@ from src.stage3_rerank import rerank
 from src.generate import generate_answer
 from src.fusion import hybrid_retrieve_chroma, expand_chunks
 from src.parse import check_file_limits
-from src.llm import stream_llm
+from src.llm import stream_llm, rewrite_query
 from src.stage5_trust import check_grounding
 
 # ─── Page config ───────────────────────────────────────────────────────────
@@ -26,6 +26,7 @@ for key, default in {
     "ingest_error": None,
     "last_filename": None,
     "result_container": None,
+    "chat_history": [],
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -42,6 +43,7 @@ if uploaded_file is not None:
         st.session_state.thread = None
         st.session_state.result_container = None
         st.session_state.last_filename = uploaded_file.name
+        st.session_state.chat_history = []
 
     collection_ready = st.session_state.collection is not None
     thread_running = (
@@ -121,12 +123,18 @@ if uploaded_file is not None:
         question = st.text_input("Ask a question about the document")
 
         if question:
+
+            # ─── Rewrite query using history ─────────────────────────────────
+            rewritten = rewrite_query(question, st.session_state.chat_history)
+            if rewritten != question:
+                st.caption(f"🔍 Interpreted as: *{rewritten}*")
+
             with st.spinner("Searching..."):
                 candidates = hybrid_retrieve_chroma(
-                    question, embed_query(question), collection, chunks,
+                    rewritten, embed_query(rewritten), collection, chunks,
                     bm25_index, top_k=12, candidate_k=12
                 )
-                top_results = rerank(question, candidates, top_k=3)
+                top_results = rerank(rewritten, candidates, top_k=3)
                 expanded = expand_chunks(top_results, chunks, neighbors=1)
                 context_chunks = [chunk for _, chunk in expanded]
                 top_index = top_results[0][0]
@@ -144,18 +152,22 @@ if uploaded_file is not None:
                 "Answer the question using only the following context. "
                 "If the answer isn't in the context, say so clearly instead of guessing.\n\n"
                 f"Context:\n{context}\n\n"
-                f"Question: {question}"
+                f"Question: {rewritten}"
             )
 
             streamed_text = st.write_stream(stream_llm(prompt))
 
             # ─── Trust check on completed answer ────────────────────────────
-            verdict = check_grounding(question, context_chunks, streamed_text)
+            verdict = check_grounding(rewritten, context_chunks, streamed_text)
 
             if verdict == "SUPPORTED":
                 st.success("🟢 HIGH CONFIDENCE")
             else:
                 st.warning("🟡 LOW CONFIDENCE")
+
+            # ─── Append to history, keep last 4 turns ───────────────────────
+            st.session_state.chat_history.append((question, streamed_text))
+            st.session_state.chat_history = st.session_state.chat_history[-4:]
 
             # ─── Source chunks expander ──────────────────────────────────────
             with st.expander(f"Show source chunks (top chunk #{top_index}, reranker score: {score:.4f})"):
