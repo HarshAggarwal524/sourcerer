@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sourcerer — Your PDF, Actually Answered.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #080400;
+  --red:     #C8340A;
+  --red-mid: #8B1A00;
+  --cream:   #F0E6CC;
+  --cream-dim: rgba(240,230,204,0.55);
+  --cream-muted: rgba(240,230,204,0.32);
+}
+
+html, body {
+  height: 100%;
+  background: var(--black);
+  color: var(--cream);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── Background gradient ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 100%, #8B1A00 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, #C8340A 0%, transparent 45%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Geometric art ── */
+.geo {
+  position: fixed;
+  right: -60px;
+  top: 0;
+  width: 55vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 32px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--cream-muted);
+  border-radius: 999px;
+  color: var(--cream);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+  letter-spacing: 0.02em;
+}
+.nav-btn:hover {
+  border-color: var(--cream-dim);
+  background: rgba(240,230,204,0.06);
+}
+.nav-btn.primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--cream);
+}
+.nav-btn.primary:hover {
+  background: #D84010;
+  border-color: #D84010;
+}
+.nav-icon {
+  width: 18px; height: 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-style: italic; font-weight: 700;
+}
+
+/* ── Main layout ── */
+main {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 6vw 60px;
+  max-width: 720px;
+}
+
+/* ── Hero ── */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+  margin-bottom: 28px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--red);
+}
+
+.divider-line {
+  width: 60px;
+  height: 1px;
+  background: var(--cream-muted);
+  margin-bottom: 28px;
+}
+
+.tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--cream-dim);
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.description {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--cream-muted);
+  line-height: 1.7;
+  max-width: 440px;
+  margin-bottom: 48px;
+}
+
+/* ── CTA ── */
+.cta-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--red);
+  border: none;
+  border-radius: 6px;
+  color: var(--cream);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 28px;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-launch:hover {
+  background: #D84010;
+  transform: translateY(-1px);
+}
+.btn-launch svg {
+  transition: transform 0.2s;
+}
+.btn-launch:hover svg {
+  transform: translateX(3px);
+}
+
+.btn-ghost {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--cream-muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  padding-bottom: 2px;
+}
+.btn-ghost:hover {
+  color: var(--cream);
+  border-color: var(--cream-dim);
+}
+
+/* ── Stat strip ── */
+.stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 72px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(240,230,204,0.1);
+  flex-wrap: wrap;
+}
+.stat-item {}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .geo { right: -100px; opacity: 0.4; }
+  main { padding: 100px 24px 60px; }
+  .stats { gap: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Geometric art SVG -->
+<svg class="geo" viewBox="0 0 700 900" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- Main parallelogram 1 -->
+  <polygon points="280,80 480,80 480,480 280,480" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.5"/>
+  <!-- Main parallelogram 2 (offset) -->
+  <polygon points="380,120 580,120 580,520 380,520" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.35"/>
+  <!-- Radiating lines from bottom-right corner -->
+  <line x1="480" y1="480" x2="700" y2="500" stroke="#F0E6CC" stroke-width="0.6" opacity="0.3"/>
+  <line x1="480" y1="480" x2="700" y2="520" stroke="#F0E6CC" stroke-width="0.6" opacity="0.28"/>
+  <line x1="480" y1="480" x2="700" y2="540" stroke="#F0E6CC" stroke-width="0.6" opacity="0.26"/>
+  <line x1="480" y1="480" x2="700" y2="560" stroke="#F0E6CC" stroke-width="0.6" opacity="0.24"/>
+  <line x1="480" y1="480" x2="700" y2="580" stroke="#F0E6CC" stroke-width="0.6" opacity="0.22"/>
+  <line x1="480" y1="480" x2="700" y2="600" stroke="#F0E6CC" stroke-width="0.6" opacity="0.20"/>
+  <line x1="480" y1="480" x2="700" y2="620" stroke="#F0E6CC" stroke-width="0.6" opacity="0.18"/>
+  <line x1="480" y1="480" x2="700" y2="640" stroke="#F0E6CC" stroke-width="0.6" opacity="0.16"/>
+  <line x1="480" y1="480" x2="700" y2="660" stroke="#F0E6CC" stroke-width="0.6" opacity="0.14"/>
+  <line x1="480" y1="480" x2="700" y2="680" stroke="#F0E6CC" stroke-width="0.6" opacity="0.12"/>
+  <line x1="480" y1="480" x2="700" y2="700" stroke="#F0E6CC" stroke-width="0.6" opacity="0.10"/>
+  <line x1="480" y1="480" x2="700" y2="720" stroke="#F0E6CC" stroke-width="0.6" opacity="0.08"/>
+  <line x1="480" y1="480" x2="650" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.07"/>
+  <line x1="480" y1="480" x2="600" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.06"/>
+  <line x1="480" y1="480" x2="550" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.05"/>
+  <!-- From second parallelogram corner -->
+  <line x1="580" y1="520" x2="700" y2="530" stroke="#F0E6CC" stroke-width="0.5" opacity="0.2"/>
+  <line x1="580" y1="520" x2="700" y2="555" stroke="#F0E6CC" stroke-width="0.5" opacity="0.18"/>
+  <line x1="580" y1="520" x2="700" y2="580" stroke="#F0E6CC" stroke-width="0.5" opacity="0.16"/>
+  <line x1="580" y1="520" x2="700" y2="610" stroke="#F0E6CC" stroke-width="0.5" opacity="0.14"/>
+  <line x1="580" y1="520" x2="700" y2="640" stroke="#F0E6CC" stroke-width="0.5" opacity="0.12"/>
+  <line x1="580" y1="520" x2="700" y2="680" stroke="#F0E6CC" stroke-width="0.5" opacity="0.10"/>
+  <line x1="580" y1="520" x2="680" y2="900" stroke="#F0E6CC" stroke-width="0.5" opacity="0.08"/>
+  <!-- Horizontal accent line (top) -->
+  <line x1="480" y1="80" x2="700" y2="80" stroke="#F0E6CC" stroke-width="0.8" opacity="0.4"/>
+</svg>
+
+<!-- Nav -->
+<nav>
+  <a href="https://github.com/HarshAggarwal524/sourcerer" target="_blank" class="nav-btn">
+    GitHub
+  </a>
+  <a href="https://sourcerer-m4ki9x5c2uugy6hrjdvlny.streamlit.app/" target="_blank" class="nav-btn primary">
+    Launch app →
+  </a>
+</nav>
+
+<!-- Main content -->
+<main>
+  <p class="eyebrow">Document intelligence</p>
+
+  <h1>Hi, I'm<br><em>Sourcerer</em></h1>
+
+  <div class="divider-line"></div>
+
+  <p class="tagline">Your PDF, actually answered.</p>
+
+  <p class="description">
+    Upload any PDF. Ask anything. Sourcerer finds the right passage,
+    verifies the answer is grounded in the source, and streams it back —
+    with a confidence badge so you know how much to trust it.
+  </p>
+
+  <div class="cta-group">
+    <a href="https://sourcerer-m4ki9x5c2uugy6hrjdvlny.streamlit.app/" target="_blank" class="btn-launch">
+      Try Sourcerer
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <a href="https://github.com/HarshAggarwal524/sourcerer" target="_blank" class="btn-ghost">
+      View source →
+    </a>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-num">12</div>
+      <div class="stat-label">Build stages</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">BM25</div>
+      <div class="stat-label">+ vector hybrid</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">BGE</div>
+      <div class="stat-label">Cross-encoder rerank</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">4-turn</div>
+      <div class="stat-label">Memory</div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
