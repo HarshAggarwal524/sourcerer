@@ -14,127 +14,223 @@ from src.parse import check_file_limits
 from src.llm import stream_llm, rewrite_query
 from src.stage5_trust import check_grounding
 
-st.set_page_config(page_title="Sourcerer", page_icon="📄", layout="centered")
+st.set_page_config(page_title="Sourcerer", page_icon="📄", layout="wide")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600&display=swap');
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
 
+/* ── Full-bleed background ── */
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(ellipse 70% 55% at 25% 100%, #8B1A00 0%, transparent 60%),
+        radial-gradient(ellipse 45% 40% at 0% 80%, #C8340A 0%, transparent 45%),
+        #080400 !important;
+    min-height: 100vh;
+}
+[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="block-container"] {
+    padding-top: 80px !important;
+    padding-left: 6vw !important;
+    padding-right: 6vw !important;
+    max-width: 1400px !important;
+}
+
+/* ── Geometric art fixed background ── */
+.geo-art {
+    position: fixed;
+    right: -60px;
+    top: 0;
+    width: 55vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+/* ── Hero ── */
+.eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(240,230,204,0.35);
+    margin-bottom: 20px;
+}
 .hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    background: linear-gradient(90deg, #FF6B00, #FF9A00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.25rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 6vw, 6rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: #F0E6CC;
+    margin-bottom: 24px;
 }
-.hero-sub {
-    font-size: 1rem;
-    color: #666;
-    font-weight: 400;
-    margin-bottom: 1rem;
+.hero-title em {
+    font-style: italic;
+    color: #C8340A;
 }
-[data-testid="stFileUploader"] {
-    border: 1.5px dashed #FF6B00 !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    background: #111 !important;
-    transition: all 0.2s ease;
+.divider-line {
+    width: 60px;
+    height: 1px;
+    background: rgba(240,230,204,0.25);
+    margin-bottom: 24px;
 }
-[data-testid="stFileUploader"]:hover {
-    border-color: #FF9A00 !important;
-    background: #1a1a1a !important;
+.hero-tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+    color: rgba(240,230,204,0.55);
+    margin-bottom: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
-[data-testid="stTextInput"] input {
-    border: 1.5px solid #333 !important;
-    border-radius: 10px !important;
-    background: #111 !important;
-    color: #fff !important;
-    font-size: 1rem !important;
-    padding: 0.75rem 1rem !important;
-    transition: border 0.2s ease;
+.hero-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(240,230,204,0.35);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 0;
 }
-[data-testid="stTextInput"] input:focus {
-    border-color: #FF6B00 !important;
-    box-shadow: 0 0 0 3px rgba(255,107,0,0.15) !important;
-}
-[data-testid="stExpander"] {
-    border: 1px solid #222 !important;
-    border-radius: 10px !important;
-    background: #111 !important;
-}
+
+/* ── Nav buttons ── */
 [data-testid="stButton"] button {
-    background: #111 !important;
-    border: 1px solid #333 !important;
-    border-radius: 8px !important;
-    color: #888 !important;
+    background: transparent !important;
+    border: 1px solid rgba(240,230,204,0.25) !important;
+    border-radius: 999px !important;
+    color: #F0E6CC !important;
     font-family: 'Inter', sans-serif !important;
-    font-size: 0.8rem !important;
+    font-size: 12px !important;
     font-weight: 500 !important;
-    padding: 6px 14px !important;
+    padding: 6px 16px !important;
+    letter-spacing: 0.04em !important;
     transition: all 0.2s ease !important;
+    white-space: nowrap !important;
 }
 [data-testid="stButton"] button:hover {
-    border-color: #FF6B00 !important;
-    color: #FF6B00 !important;
+    border-color: rgba(240,230,204,0.6) !important;
+    background: rgba(240,230,204,0.06) !important;
 }
+
+/* ── File uploader ── */
+[data-testid="stFileUploader"] {
+    border: 1px solid rgba(240,230,204,0.15) !important;
+    border-radius: 10px !important;
+    background: rgba(240,230,204,0.03) !important;
+    max-width: 500px !important;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: rgba(200,52,10,0.5) !important;
+}
+[data-testid="stFileUploader"] label {
+    color: rgba(240,230,204,0.5) !important;
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+/* ── Text input ── */
+[data-testid="stTextInput"] input {
+    border: 1px solid rgba(240,230,204,0.15) !important;
+    border-radius: 8px !important;
+    background: rgba(240,230,204,0.04) !important;
+    color: #F0E6CC !important;
+    font-size: 0.95rem !important;
+    padding: 0.75rem 1rem !important;
+    max-width: 500px !important;
+}
+[data-testid="stTextInput"] input:focus {
+    border-color: rgba(200,52,10,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(200,52,10,0.12) !important;
+}
+[data-testid="stTextInput"] input::placeholder {
+    color: rgba(240,230,204,0.25) !important;
+}
+
+/* ── Expander ── */
+[data-testid="stExpander"] {
+    border: 1px solid rgba(240,230,204,0.12) !important;
+    border-radius: 10px !important;
+    background: rgba(240,230,204,0.03) !important;
+}
+
+/* ── Success/error banners ── */
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+    border: none !important;
+    max-width: 500px !important;
+}
+
+/* ── Answer text ── */
+[data-testid="stMarkdownContainer"] p {
+    color: #F0E6CC;
+    line-height: 1.75;
+}
+
+/* ── Confidence badges ── */
 .badge-high {
     display: inline-block;
-    background: rgba(0,200,100,0.1);
-    color: #00C864;
-    border: 1px solid rgba(0,200,100,0.3);
+    background: rgba(0,200,100,0.08);
+    color: #4ADE80;
+    border: 1px solid rgba(0,200,100,0.2);
     border-radius: 999px;
-    padding: 0.25rem 0.85rem;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     margin-top: 0.75rem;
+    text-transform: uppercase;
 }
 .badge-low {
     display: inline-block;
-    background: rgba(255,107,0,0.1);
-    color: #FF6B00;
-    border: 1px solid rgba(255,107,0,0.3);
+    background: rgba(200,52,10,0.08);
+    color: #FB923C;
+    border: 1px solid rgba(200,52,10,0.25);
     border-radius: 999px;
-    padding: 0.25rem 0.85rem;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     margin-top: 0.75rem;
+    text-transform: uppercase;
 }
+
+/* ── Info panel content ── */
 .info-section { margin-bottom: 1.25rem; }
 .info-section h3 {
-    color: #FF6B00;
-    font-size: 0.75rem;
+    color: #C8340A;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     margin-bottom: 0.5rem;
 }
 .info-section p, .info-section li {
-    color: #aaa;
-    font-size: 0.9rem;
-    line-height: 1.6;
+    color: rgba(240,230,204,0.6);
+    font-size: 0.88rem;
+    line-height: 1.65;
 }
-.info-section ul { padding-left: 1.2rem; margin: 0; }
+.info-section ul { padding-left: 1.1rem; margin: 0; }
 .tech-pill {
     display: inline-block;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: rgba(240,230,204,0.05);
+    border: 1px solid rgba(240,230,204,0.15);
     border-radius: 999px;
     padding: 3px 10px;
-    font-size: 0.75rem;
-    color: #aaa;
+    font-size: 0.72rem;
+    color: rgba(240,230,204,0.5);
     margin: 3px;
 }
+
+/* ── Pipeline animation ── */
 @keyframes flow {
-    0% { stroke-dashoffset: 24; opacity: 0.3; }
-    50% { opacity: 1; }
-    100% { stroke-dashoffset: 0; opacity: 0.3; }
+    0%   { stroke-dashoffset: 24; opacity: 0.25; }
+    50%  { opacity: 0.9; }
+    100% { stroke-dashoffset: 0; opacity: 0.25; }
 }
 .pipe  { stroke-dasharray: 6 6; animation: flow 1.4s linear infinite 0.0s; }
 .pipe2 { stroke-dasharray: 6 6; animation: flow 1.4s linear infinite 0.2s; }
@@ -142,8 +238,34 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .pipe4 { stroke-dasharray: 6 6; animation: flow 1.4s linear infinite 0.6s; }
 .pipe5 { stroke-dasharray: 6 6; animation: flow 1.4s linear infinite 0.8s; }
 .pipe6 { stroke-dasharray: 6 6; animation: flow 1.4s linear infinite 1.0s; }
-hr { border-color: #222 !important; margin: 1.5rem 0 !important; }
+
+hr { border-color: rgba(240,230,204,0.1) !important; margin: 1.5rem 0 !important; }
 </style>
+
+<!-- Geometric art fixed background -->
+<svg class="geo-art" viewBox="0 0 700 900" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <polygon points="280,80 480,80 480,480 280,480" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.45"/>
+  <polygon points="380,120 580,120 580,520 380,520" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.3"/>
+  <line x1="480" y1="480" x2="700" y2="500" stroke="#F0E6CC" stroke-width="0.6" opacity="0.28"/>
+  <line x1="480" y1="480" x2="700" y2="524" stroke="#F0E6CC" stroke-width="0.6" opacity="0.26"/>
+  <line x1="480" y1="480" x2="700" y2="548" stroke="#F0E6CC" stroke-width="0.6" opacity="0.24"/>
+  <line x1="480" y1="480" x2="700" y2="572" stroke="#F0E6CC" stroke-width="0.6" opacity="0.22"/>
+  <line x1="480" y1="480" x2="700" y2="596" stroke="#F0E6CC" stroke-width="0.6" opacity="0.20"/>
+  <line x1="480" y1="480" x2="700" y2="620" stroke="#F0E6CC" stroke-width="0.6" opacity="0.18"/>
+  <line x1="480" y1="480" x2="700" y2="644" stroke="#F0E6CC" stroke-width="0.6" opacity="0.16"/>
+  <line x1="480" y1="480" x2="700" y2="668" stroke="#F0E6CC" stroke-width="0.6" opacity="0.14"/>
+  <line x1="480" y1="480" x2="700" y2="692" stroke="#F0E6CC" stroke-width="0.6" opacity="0.12"/>
+  <line x1="480" y1="480" x2="700" y2="716" stroke="#F0E6CC" stroke-width="0.6" opacity="0.10"/>
+  <line x1="480" y1="480" x2="680" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.08"/>
+  <line x1="480" y1="480" x2="620" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.06"/>
+  <line x1="480" y1="480" x2="560" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.05"/>
+  <line x1="580" y1="520" x2="700" y2="534" stroke="#F0E6CC" stroke-width="0.5" opacity="0.18"/>
+  <line x1="580" y1="520" x2="700" y2="558" stroke="#F0E6CC" stroke-width="0.5" opacity="0.16"/>
+  <line x1="580" y1="520" x2="700" y2="582" stroke="#F0E6CC" stroke-width="0.5" opacity="0.14"/>
+  <line x1="580" y1="520" x2="700" y2="610" stroke="#F0E6CC" stroke-width="0.5" opacity="0.12"/>
+  <line x1="580" y1="520" x2="700" y2="640" stroke="#F0E6CC" stroke-width="0.5" opacity="0.10"/>
+  <line x1="480" y1="80" x2="700" y2="80" stroke="#F0E6CC" stroke-width="0.8" opacity="0.38"/>
+</svg>
 """, unsafe_allow_html=True)
 
 # ─── Session state defaults ─────────────────────────────────────────────────
@@ -160,16 +282,25 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ─── Hero + top buttons ──────────────────────────────────────────────────────
-col1, col2, col3 = st.columns([6, 1, 1])
-with col1:
-    st.markdown('<div class="hero-title">Sourcerer</div><div class="hero-sub">Upload a PDF. Ask anything.</div>', unsafe_allow_html=True)
-with col2:
+# ─── Hero + nav buttons ──────────────────────────────────────────────────────
+col_hero, col_gap, col_pipe, col_info = st.columns([7, 2, 1, 1])
+
+with col_hero:
+    st.markdown("""
+<p class="eyebrow">Document intelligence</p>
+<div class="hero-title">Hi, I'm<br><em>Sourcerer</em></div>
+<div class="divider-line"></div>
+<p class="hero-tagline">Your PDF, actually answered.</p>
+<p class="hero-desc">Upload any PDF. Ask anything. Sourcerer finds the right passage, verifies the answer is grounded in the source, and streams it back with a confidence badge.</p>
+""", unsafe_allow_html=True)
+
+with col_pipe:
     if st.button("⚡ Pipeline"):
         st.session_state.show_pipeline = not st.session_state.show_pipeline
         st.session_state.show_info = False
-with col3:
-    if st.button("? Info"):
+
+with col_info:
+    if st.button("ℹ Info"):
         st.session_state.show_info = not st.session_state.show_info
         st.session_state.show_pipeline = False
 
@@ -183,25 +314,23 @@ if st.session_state.show_info:
   verifies the answer is grounded in the source, and streams it back word by word —
   with a confidence badge telling you how much to trust it.</p>
 </div>
-
 <div class="info-section">
   <h3>How it was built — 12 stages</h3>
   <ul>
-    <li><b style="color:#fff">Stage 0</b> — Basic RAG pipeline: parse, chunk, embed, retrieve, generate</li>
-    <li><b style="color:#fff">Stage 1</b> — Baseline report card across 4 test sets (easy / hard / hardest / ambiguous)</li>
-    <li><b style="color:#fff">Stage 2</b> — Hybrid BM25 + vector search with RRF fusion</li>
-    <li><b style="color:#fff">Stage 3</b> — Cross-encoder reranking (bge-reranker-v2-m3)</li>
-    <li><b style="color:#fff">Stage 4</b> — HyDE query expansion (tested, not in final pipeline)</li>
-    <li><b style="color:#fff">Stage 5</b> — LLM-as-judge trust check for grounding verification</li>
-    <li><b style="color:#fff">Stage 6</b> — Chroma vector database replacing pickle storage</li>
-    <li><b style="color:#fff">Stage 7</b> — Messy PDF handling, scanned PDF detection, guardrails</li>
-    <li><b style="color:#fff">Stage 8</b> — Non-blocking background ingestion with threading</li>
-    <li><b style="color:#fff">Stage 9</b> — Streaming answers token by token</li>
-    <li><b style="color:#fff">Stage 9.5</b> — Conversation memory with 4-turn query rewriting</li>
-    <li><b style="color:#fff">Stage 10</b> — Deployed to Streamlit Community Cloud</li>
+    <li><b style="color:#F0E6CC">Stage 0</b> — Basic RAG pipeline: parse, chunk, embed, retrieve, generate</li>
+    <li><b style="color:#F0E6CC">Stage 1</b> — Baseline report card across 4 test sets</li>
+    <li><b style="color:#F0E6CC">Stage 2</b> — Hybrid BM25 + vector search with RRF fusion</li>
+    <li><b style="color:#F0E6CC">Stage 3</b> — Cross-encoder reranking (bge-reranker-v2-m3)</li>
+    <li><b style="color:#F0E6CC">Stage 4</b> — HyDE query expansion (tested, not in final pipeline)</li>
+    <li><b style="color:#F0E6CC">Stage 5</b> — LLM-as-judge trust check for grounding verification</li>
+    <li><b style="color:#F0E6CC">Stage 6</b> — Chroma vector database replacing pickle storage</li>
+    <li><b style="color:#F0E6CC">Stage 7</b> — Messy PDF handling, scanned PDF detection, guardrails</li>
+    <li><b style="color:#F0E6CC">Stage 8</b> — Non-blocking background ingestion with threading</li>
+    <li><b style="color:#F0E6CC">Stage 9</b> — Streaming answers token by token</li>
+    <li><b style="color:#F0E6CC">Stage 9.5</b> — Conversation memory with 4-turn query rewriting</li>
+    <li><b style="color:#F0E6CC">Stage 10</b> — Deployed to Streamlit Community Cloud</li>
   </ul>
 </div>
-
 <div class="info-section">
   <h3>Tech stack</h3>
   <span class="tech-pill">Python</span>
@@ -225,95 +354,56 @@ if st.session_state.show_pipeline:
       <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
   </defs>
-
-  <text x="340" y="28" text-anchor="middle" style="fill:#555;font-size:11px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.08em">INGEST TIME</text>
-
-  <rect x="20" y="42" width="80" height="56" rx="8" fill="#1a0d00" stroke="#FF6B00" stroke-width="0.5"/>
-  <text x="60" y="65" text-anchor="middle" style="fill:#FF9A00;font-size:13px;font-family:Inter,sans-serif;font-weight:600">PDF</text>
-  <text x="60" y="83" text-anchor="middle" style="fill:#664400;font-size:11px;font-family:Inter,sans-serif">upload</text>
-
-  <line class="pipe" x1="102" y1="70" x2="136" y2="70" stroke="#FF6B00" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="138" y="42" width="88" height="56" rx="8" fill="#1a1200" stroke="#BA7517" stroke-width="0.5"/>
-  <text x="182" y="65" text-anchor="middle" style="fill:#EF9F27;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Parse</text>
-  <text x="182" y="83" text-anchor="middle" style="fill:#664400;font-size:11px;font-family:Inter,sans-serif">extract text</text>
-
-  <line class="pipe2" x1="228" y1="70" x2="262" y2="70" stroke="#BA7517" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="264" y="42" width="88" height="56" rx="8" fill="#1a1200" stroke="#BA7517" stroke-width="0.5"/>
-  <text x="308" y="65" text-anchor="middle" style="fill:#EF9F27;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Chunk</text>
-  <text x="308" y="83" text-anchor="middle" style="fill:#664400;font-size:11px;font-family:Inter,sans-serif">300 words</text>
-
-  <line class="pipe3" x1="354" y1="70" x2="388" y2="70" stroke="#BA7517" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="390" y="42" width="88" height="56" rx="8" fill="#0d0a1a" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="340" y="28" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:11px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.08em">INGEST TIME</text>
+  <rect x="20" y="42" width="80" height="56" rx="8" fill="#1a0800" stroke="#C8340A" stroke-width="0.5"/>
+  <text x="60" y="65" text-anchor="middle" style="fill:#F0A060;font-size:13px;font-family:Inter,sans-serif;font-weight:600">PDF</text>
+  <text x="60" y="83" text-anchor="middle" style="fill:#5a2010;font-size:11px;font-family:Inter,sans-serif">upload</text>
+  <line class="pipe" x1="102" y1="70" x2="136" y2="70" stroke="#C8340A" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <rect x="138" y="42" width="88" height="56" rx="8" fill="#1a1000" stroke="#8B5500" stroke-width="0.5"/>
+  <text x="182" y="65" text-anchor="middle" style="fill:#D4A050;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Parse</text>
+  <text x="182" y="83" text-anchor="middle" style="fill:#5a3a00;font-size:11px;font-family:Inter,sans-serif">extract text</text>
+  <line class="pipe2" x1="228" y1="70" x2="262" y2="70" stroke="#8B5500" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <rect x="264" y="42" width="88" height="56" rx="8" fill="#1a1000" stroke="#8B5500" stroke-width="0.5"/>
+  <text x="308" y="65" text-anchor="middle" style="fill:#D4A050;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Chunk</text>
+  <text x="308" y="83" text-anchor="middle" style="fill:#5a3a00;font-size:11px;font-family:Inter,sans-serif">300 words</text>
+  <line class="pipe3" x1="354" y1="70" x2="388" y2="70" stroke="#8B5500" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <rect x="390" y="42" width="88" height="56" rx="8" fill="#0a0a1a" stroke="#3C3489" stroke-width="0.5"/>
   <text x="434" y="65" text-anchor="middle" style="fill:#AFA9EC;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Embed</text>
   <text x="434" y="83" text-anchor="middle" style="fill:#3C3489;font-size:11px;font-family:Inter,sans-serif">MiniLM</text>
-
-  <line class="pipe4" x1="480" y1="70" x2="514" y2="70" stroke="#534AB7" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="516" y="42" width="90" height="56" rx="8" fill="#0d0a1a" stroke="#534AB7" stroke-width="0.5"/>
+  <line class="pipe4" x1="480" y1="70" x2="514" y2="70" stroke="#3C3489" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <rect x="516" y="42" width="90" height="56" rx="8" fill="#0a0a1a" stroke="#3C3489" stroke-width="0.5"/>
   <text x="561" y="65" text-anchor="middle" style="fill:#AFA9EC;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Chroma</text>
   <text x="561" y="83" text-anchor="middle" style="fill:#3C3489;font-size:11px;font-family:Inter,sans-serif">vector store</text>
-
-  <line x1="20" y1="126" x2="660" y2="126" stroke="#222" stroke-width="0.5" stroke-dasharray="4 4"/>
-  <text x="340" y="144" text-anchor="middle" style="fill:#444;font-size:11px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.08em">QUERY TIME</text>
-
-  <rect x="20" y="160" width="88" height="56" rx="8" fill="#111" stroke="#444" stroke-width="0.5"/>
-  <text x="64" y="183" text-anchor="middle" style="fill:#aaa;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Question</text>
-  <text x="64" y="201" text-anchor="middle" style="fill:#555;font-size:11px;font-family:Inter,sans-serif">user input</text>
-
-  <line class="pipe5" x1="110" y1="188" x2="144" y2="188" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="146" y="160" width="88" height="56" rx="8" fill="#001a14" stroke="#0F6E56" stroke-width="0.5"/>
+  <line x1="20" y1="126" x2="660" y2="126" stroke="rgba(240,230,204,0.08)" stroke-width="0.5" stroke-dasharray="4 4"/>
+  <text x="340" y="144" text-anchor="middle" style="fill:rgba(240,230,204,0.25);font-size:11px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.08em">QUERY TIME</text>
+  <rect x="20" y="160" width="88" height="56" rx="8" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.15)" stroke-width="0.5"/>
+  <text x="64" y="183" text-anchor="middle" style="fill:rgba(240,230,204,0.7);font-size:13px;font-family:Inter,sans-serif;font-weight:600">Question</text>
+  <text x="64" y="201" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:11px;font-family:Inter,sans-serif">user input</text>
+  <line class="pipe5" x1="110" y1="188" x2="144" y2="188" stroke="rgba(240,230,204,0.3)" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <rect x="146" y="160" width="88" height="56" rx="8" fill="#001a10" stroke="#0F6E56" stroke-width="0.5"/>
   <text x="190" y="183" text-anchor="middle" style="fill:#5DCAA5;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Rewrite</text>
   <text x="190" y="201" text-anchor="middle" style="fill:#085041;font-size:11px;font-family:Inter,sans-serif">query expand</text>
-
   <line class="pipe5" x1="236" y1="188" x2="270" y2="188" stroke="#0F6E56" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="272" y="160" width="100" height="56" rx="8" fill="#001a14" stroke="#0F6E56" stroke-width="0.5"/>
+  <rect x="272" y="160" width="100" height="56" rx="8" fill="#001a10" stroke="#0F6E56" stroke-width="0.5"/>
   <text x="322" y="183" text-anchor="middle" style="fill:#5DCAA5;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Retrieve</text>
   <text x="322" y="201" text-anchor="middle" style="fill:#085041;font-size:11px;font-family:Inter,sans-serif">BM25 + vector</text>
-
-  <path class="pipe4" d="M561 100 L561 143 L322 143 L322 158" stroke="#534AB7" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
+  <path class="pipe4" d="M561 100 L561 143 L322 143 L322 158" stroke="#3C3489" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
   <line class="pipe6" x1="374" y1="188" x2="408" y2="188" stroke="#0F6E56" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="410" y="160" width="88" height="56" rx="8" fill="#00111a" stroke="#185FA5" stroke-width="0.5"/>
+  <rect x="410" y="160" width="88" height="56" rx="8" fill="#00101a" stroke="#185FA5" stroke-width="0.5"/>
   <text x="454" y="183" text-anchor="middle" style="fill:#85B7EB;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Rerank</text>
   <text x="454" y="201" text-anchor="middle" style="fill:#0C447C;font-size:11px;font-family:Inter,sans-serif">cross-encoder</text>
-
   <line class="pipe6" x1="500" y1="188" x2="534" y2="188" stroke="#185FA5" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="536" y="160" width="88" height="56" rx="8" fill="#00111a" stroke="#185FA5" stroke-width="0.5"/>
+  <rect x="536" y="160" width="88" height="56" rx="8" fill="#00101a" stroke="#185FA5" stroke-width="0.5"/>
   <text x="580" y="183" text-anchor="middle" style="fill:#85B7EB;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Gemini</text>
   <text x="580" y="201" text-anchor="middle" style="fill:#0C447C;font-size:11px;font-family:Inter,sans-serif">generate</text>
-
   <path class="pipe6" d="M580 218 L580 308 L534 308" stroke="#185FA5" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <rect x="272" y="280" width="100" height="56" rx="8" fill="#001a00" stroke="#3B6D11" stroke-width="0.5"/>
+  <rect x="272" y="280" width="100" height="56" rx="8" fill="#001800" stroke="#3B6D11" stroke-width="0.5"/>
   <text x="322" y="303" text-anchor="middle" style="fill:#97C459;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Trust check</text>
   <text x="322" y="321" text-anchor="middle" style="fill:#27500A;font-size:11px;font-family:Inter,sans-serif">LLM judge</text>
-
-  <rect x="430" y="280" width="100" height="56" rx="8" fill="#1a0900" stroke="#FF6B00" stroke-width="0.5"/>
-  <text x="480" y="303" text-anchor="middle" style="fill:#FF9A00;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Answer</text>
-  <text x="480" y="321" text-anchor="middle" style="fill:#664400;font-size:11px;font-family:Inter,sans-serif">streamed</text>
-
+  <rect x="430" y="280" width="100" height="56" rx="8" fill="#1a0800" stroke="#C8340A" stroke-width="0.5"/>
+  <text x="480" y="303" text-anchor="middle" style="fill:#F0A060;font-size:13px;font-family:Inter,sans-serif;font-weight:600">Answer</text>
+  <text x="480" y="321" text-anchor="middle" style="fill:#5a2010;font-size:11px;font-family:Inter,sans-serif">streamed</text>
   <path class="pipe6" d="M374 308 L428 308" stroke="#3B6D11" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <text x="20" y="390" style="fill:#444;font-size:10px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.08em">LEGEND</text>
-  <rect x="20" y="400" width="10" height="10" rx="2" fill="#1a0d00" stroke="#FF6B00" stroke-width="0.5"/>
-  <text x="36" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">Input/Output</text>
-  <rect x="120" y="400" width="10" height="10" rx="2" fill="#1a1200" stroke="#BA7517" stroke-width="0.5"/>
-  <text x="136" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">Processing</text>
-  <rect x="220" y="400" width="10" height="10" rx="2" fill="#0d0a1a" stroke="#534AB7" stroke-width="0.5"/>
-  <text x="236" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">Vectors</text>
-  <rect x="300" y="400" width="10" height="10" rx="2" fill="#001a14" stroke="#0F6E56" stroke-width="0.5"/>
-  <text x="316" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">Retrieval</text>
-  <rect x="390" y="400" width="10" height="10" rx="2" fill="#00111a" stroke="#185FA5" stroke-width="0.5"/>
-  <text x="406" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">LLM</text>
-  <rect x="450" y="400" width="10" height="10" rx="2" fill="#001a00" stroke="#3B6D11" stroke-width="0.5"/>
-  <text x="466" y="410" style="fill:#555;font-size:10px;font-family:Inter,sans-serif">Trust</text>
 </svg>
 """, unsafe_allow_html=True)
 
@@ -453,4 +543,4 @@ if uploaded_file is not None:
                     st.divider()
 
 else:
-    st.markdown('<p style="color:#555;font-size:0.95rem;">Upload a PDF to get started.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:rgba(240,230,204,0.3);font-size:0.9rem;margin-top:0.5rem;">Upload a PDF to get started.</p>', unsafe_allow_html=True)
