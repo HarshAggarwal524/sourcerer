@@ -480,62 +480,45 @@ with right:
 <div class="panel-card">
   <div class="panel-label">Pipeline</div>
   <svg width="100%" viewBox="0 0 160 560" xmlns="http://www.w3.org/2000/svg">
-
     <text x="80" y="14" text-anchor="middle" style="fill:rgba(240,230,204,0.2);font-size:7px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">INGEST</text>
-
     <rect x="20" y="20" width="120" height="30" rx="5" fill="rgba(200,52,10,0.1)" stroke="rgba(200,52,10,0.35)" stroke-width="0.7"/>
     <text x="80" y="32" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">PDF upload</text>
     <text x="80" y="44" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">parse · chunk · embed</text>
-
     <line class="p1" x1="80" y1="51" x2="80" y2="68" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,66 80,74 84,66" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="76" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="88" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Chroma</text>
     <text x="80" y="100" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">vector store</text>
-
     <line x1="20" y1="124" x2="140" y2="124" stroke="rgba(240,230,204,0.07)" stroke-width="0.5" stroke-dasharray="3 3"/>
     <text x="80" y="136" text-anchor="middle" style="fill:rgba(240,230,204,0.18);font-size:7px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">QUERY</text>
-
     <rect x="20" y="142" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="154" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Question</text>
     <text x="80" y="166" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">user input</text>
-
     <line class="p2" x1="80" y1="173" x2="80" y2="190" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,188 80,196 84,188" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="198" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="210" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Rewrite</text>
     <text x="80" y="222" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">query expansion</text>
-
     <line class="p3" x1="80" y1="229" x2="80" y2="246" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,244 80,252 84,244" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="254" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="266" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Retrieve</text>
     <text x="80" y="278" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">BM25 + vector + RRF</text>
-
     <line class="p4" x1="80" y1="285" x2="80" y2="302" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,300 80,308 84,300" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="310" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="322" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Rerank</text>
     <text x="80" y="334" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">cross-encoder BGE</text>
-
     <line class="p5" x1="80" y1="341" x2="80" y2="358" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,356 80,364 84,356" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="366" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
     <text x="80" y="378" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Gemini</text>
     <text x="80" y="390" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">stream answer</text>
-
     <line class="p6" x1="80" y1="397" x2="80" y2="414" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
     <polygon points="76,412 80,420 84,412" fill="rgba(240,230,204,0.22)"/>
-
     <rect x="20" y="422" width="120" height="30" rx="5" fill="rgba(200,52,10,0.08)" stroke="rgba(200,52,10,0.28)" stroke-width="0.7"/>
     <text x="80" y="434" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Answer</text>
     <text x="80" y="446" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">trust check · confidence</text>
-
   </svg>
 </div>
 """, unsafe_allow_html=True)
