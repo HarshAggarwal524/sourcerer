@@ -25,20 +25,26 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 [data-testid="stAppViewContainer"] {
     background:
-        radial-gradient(ellipse 70% 55% at 25% 100%, #8B1A00 0%, transparent 60%),
+        radial-gradient(ellipse 70% 55% at 20% 100%, #8B1A00 0%, transparent 60%),
         radial-gradient(ellipse 45% 40% at 0% 80%, #C8340A 0%, transparent 45%),
         #080400 !important;
     min-height: 100vh;
 }
 [data-testid="stHeader"] { background: transparent !important; }
 [data-testid="block-container"] {
-    padding-top: 60px !important;
+    padding-top: 48px !important;
     padding-left: 5vw !important;
     padding-right: 5vw !important;
     max-width: 1600px !important;
 }
 
-/* Geometric art */
+/* Remove default column gap bloat */
+[data-testid="stHorizontalBlock"] {
+    gap: 2rem !important;
+    align-items: flex-start !important;
+}
+
+/* Geo art */
 .geo-art {
     position: fixed;
     right: -60px;
@@ -47,59 +53,56 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     height: 100vh;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.65;
 }
 
 /* Hero */
 .eyebrow {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(240,230,204,0.35);
-    margin-bottom: 16px;
+    color: rgba(240,230,204,0.3);
+    margin-bottom: 14px;
+    margin-top: 0;
 }
 .hero-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.8rem, 5.5vw, 5.5rem);
+    font-size: clamp(2.6rem, 5vw, 5rem);
     font-weight: 900;
     line-height: 0.95;
     letter-spacing: -0.02em;
     color: #F0E6CC;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
-.hero-title em {
-    font-style: italic;
-    color: #C8340A;
-}
+.hero-title em { font-style: italic; color: #C8340A; }
 .divider-line {
-    width: 50px;
-    height: 1px;
-    background: rgba(240,230,204,0.2);
-    margin-bottom: 20px;
+    width: 44px; height: 1px;
+    background: rgba(240,230,204,0.18);
+    margin-bottom: 16px;
 }
 .hero-tagline {
     font-family: 'Playfair Display', serif;
     font-style: italic;
-    font-size: clamp(0.85rem, 1.5vw, 1.05rem);
-    color: rgba(240,230,204,0.5);
-    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: rgba(240,230,204,0.45);
+    margin-bottom: 8px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 .hero-desc {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 300;
-    color: rgba(240,230,204,0.32);
-    line-height: 1.7;
-    max-width: 380px;
+    color: rgba(240,230,204,0.28);
+    line-height: 1.65;
+    max-width: 360px;
     margin-bottom: 0;
 }
 
-/* Nav buttons — pill style */
+/* Buttons */
 [data-testid="stButton"] button {
     background: transparent !important;
-    border: 1px solid rgba(240,230,204,0.22) !important;
+    border: 1px solid rgba(240,230,204,0.2) !important;
     border-radius: 999px !important;
     color: #F0E6CC !important;
     font-family: 'Inter', sans-serif !important;
@@ -108,163 +111,176 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     padding: 5px 14px !important;
     letter-spacing: 0.04em !important;
     white-space: nowrap !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.2s !important;
+    width: 100% !important;
 }
 [data-testid="stButton"] button:hover {
-    border-color: rgba(240,230,204,0.55) !important;
-    background: rgba(240,230,204,0.05) !important;
+    border-color: rgba(240,230,204,0.5) !important;
+    background: rgba(240,230,204,0.04) !important;
+}
+
+/* Remove column padding on button row */
+[data-testid="stHorizontalBlock"] > div:first-child,
+[data-testid="stHorizontalBlock"] > div:last-child {
+    padding: 0 !important;
 }
 
 /* File uploader */
 [data-testid="stFileUploader"] {
-    border: 1px solid rgba(240,230,204,0.12) !important;
-    border-radius: 10px !important;
-    background: rgba(8,4,0,0.75) !important;
-    padding: 12px !important;
-    max-width: 460px !important;
-    margin-top: 8px !important;
+    border: 1px solid rgba(240,230,204,0.1) !important;
+    border-radius: 8px !important;
+    background: rgba(8,4,0,0.8) !important;
+    padding: 8px !important;
+    max-width: 440px !important;
 }
 [data-testid="stFileUploader"]:hover {
-    border-color: rgba(200,52,10,0.4) !important;
-}
-[data-testid="stFileUploaderDropzoneInstructions"] {
-    color: rgba(240,230,204,0.35) !important;
+    border-color: rgba(200,52,10,0.35) !important;
 }
 
-/* Text input — solid background */
+/* Text input */
 [data-testid="stTextInput"] input {
-    border: 1px solid rgba(240,230,204,0.15) !important;
-    border-radius: 8px !important;
-    background: rgba(8,4,0,0.85) !important;
+    border: 1px solid rgba(240,230,204,0.12) !important;
+    border-radius: 7px !important;
+    background: rgba(8,4,0,0.88) !important;
     color: #F0E6CC !important;
-    font-size: 0.9rem !important;
-    padding: 0.7rem 1rem !important;
-    max-width: 460px !important;
+    font-size: 0.88rem !important;
+    padding: 0.65rem 0.9rem !important;
+    max-width: 440px !important;
 }
 [data-testid="stTextInput"] input:focus {
-    border-color: rgba(200,52,10,0.5) !important;
-    box-shadow: 0 0 0 2px rgba(200,52,10,0.1) !important;
+    border-color: rgba(200,52,10,0.45) !important;
+    box-shadow: 0 0 0 2px rgba(200,52,10,0.08) !important;
 }
 [data-testid="stTextInput"] input::placeholder {
-    color: rgba(240,230,204,0.2) !important;
+    color: rgba(240,230,204,0.18) !important;
 }
 
 /* Expander */
 [data-testid="stExpander"] {
-    border: 1px solid rgba(240,230,204,0.1) !important;
-    border-radius: 10px !important;
-    background: rgba(8,4,0,0.8) !important;
+    border: 1px solid rgba(240,230,204,0.08) !important;
+    border-radius: 8px !important;
+    background: rgba(8,4,0,0.82) !important;
 }
 
 /* Alerts */
 [data-testid="stAlert"] {
-    border-radius: 8px !important;
+    border-radius: 7px !important;
     border: none !important;
-    max-width: 460px !important;
-    background: rgba(8,4,0,0.8) !important;
+    max-width: 440px !important;
 }
 
 /* Answer text */
-[data-testid="stMarkdownContainer"] p {
-    color: #F0E6CC;
-    line-height: 1.75;
-}
+[data-testid="stMarkdownContainer"] p { color: #F0E6CC; line-height: 1.75; }
 
-/* Confidence badges */
+/* Badges */
 .badge-high {
     display: inline-block;
     background: rgba(0,180,80,0.07);
     color: #4ADE80;
-    border: 1px solid rgba(0,180,80,0.18);
+    border: 1px solid rgba(0,180,80,0.16);
     border-radius: 999px;
-    padding: 0.2rem 0.75rem;
-    font-size: 0.7rem;
+    padding: 0.18rem 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.08em;
-    margin-top: 0.75rem;
+    margin-top: 0.6rem;
     text-transform: uppercase;
 }
 .badge-low {
     display: inline-block;
     background: rgba(200,52,10,0.07);
     color: #FB923C;
-    border: 1px solid rgba(200,52,10,0.2);
+    border: 1px solid rgba(200,52,10,0.18);
     border-radius: 999px;
-    padding: 0.2rem 0.75rem;
-    font-size: 0.7rem;
+    padding: 0.18rem 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.08em;
-    margin-top: 0.75rem;
+    margin-top: 0.6rem;
     text-transform: uppercase;
 }
 
-/* Info panel */
-.info-section { margin-bottom: 1.1rem; }
-.info-section h3 {
-    color: rgba(200,52,10,0.9);
-    font-size: 0.7rem;
+/* Right panel card */
+.panel-card {
+    margin-top: 12px;
+    padding: 14px;
+    background: rgba(8,4,0,0.88);
+    border: 1px solid rgba(240,230,204,0.09);
+    border-radius: 10px;
+}
+.panel-label {
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
+    color: rgba(240,230,204,0.22);
     text-transform: uppercase;
-    margin-bottom: 0.4rem;
+    margin-bottom: 10px;
 }
-.info-section p, .info-section li {
-    color: rgba(240,230,204,0.55);
-    font-size: 0.82rem;
-    line-height: 1.6;
+.info-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+    align-items: baseline;
 }
-.info-section ul { padding-left: 1rem; margin: 0; }
+.info-stage {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(200,52,10,0.8);
+    min-width: 28px;
+    letter-spacing: 0.04em;
+}
+.info-text {
+    font-size: 10.5px;
+    color: rgba(240,230,204,0.5);
+    line-height: 1.4;
+}
 .tech-pill {
     display: inline-block;
-    background: rgba(240,230,204,0.04);
-    border: 1px solid rgba(240,230,204,0.12);
+    background: rgba(240,230,204,0.03);
+    border: 1px solid rgba(240,230,204,0.1);
     border-radius: 999px;
-    padding: 2px 9px;
-    font-size: 0.68rem;
-    color: rgba(240,230,204,0.4);
+    padding: 2px 8px;
+    font-size: 9px;
+    color: rgba(240,230,204,0.35);
     margin: 2px;
 }
 
 /* Pipeline animation */
 @keyframes flow {
-    0%   { stroke-dashoffset: 20; opacity: 0.2; }
-    50%  { opacity: 0.7; }
-    100% { stroke-dashoffset: 0; opacity: 0.2; }
+    0%   { stroke-dashoffset: 18; opacity: 0.15; }
+    50%  { opacity: 0.6; }
+    100% { stroke-dashoffset: 0; opacity: 0.15; }
 }
-.pipe  { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 0.0s; }
-.pipe2 { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 0.3s; }
-.pipe3 { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 0.6s; }
-.pipe4 { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 0.9s; }
-.pipe5 { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 1.2s; }
-.pipe6 { stroke-dasharray: 5 5; animation: flow 1.6s linear infinite 1.5s; }
+.p1 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 0.0s; }
+.p2 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 0.3s; }
+.p3 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 0.6s; }
+.p4 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 0.9s; }
+.p5 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 1.2s; }
+.p6 { stroke-dasharray: 4 4; animation: flow 1.8s linear infinite 1.5s; }
 
-hr { border-color: rgba(240,230,204,0.08) !important; margin: 1.2rem 0 !important; }
+hr { border-color: rgba(240,230,204,0.07) !important; margin: 1rem 0 !important; }
 </style>
 
-<!-- Geometric art -->
 <svg class="geo-art" viewBox="0 0 700 900" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <polygon points="280,80 480,80 480,480 280,480" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.4"/>
-  <polygon points="380,120 580,120 580,520 380,520" fill="none" stroke="#F0E6CC" stroke-width="1.2" opacity="0.25"/>
-  <line x1="480" y1="480" x2="700" y2="500" stroke="#F0E6CC" stroke-width="0.6" opacity="0.25"/>
-  <line x1="480" y1="480" x2="700" y2="524" stroke="#F0E6CC" stroke-width="0.6" opacity="0.23"/>
-  <line x1="480" y1="480" x2="700" y2="548" stroke="#F0E6CC" stroke-width="0.6" opacity="0.21"/>
-  <line x1="480" y1="480" x2="700" y2="572" stroke="#F0E6CC" stroke-width="0.6" opacity="0.19"/>
-  <line x1="480" y1="480" x2="700" y2="596" stroke="#F0E6CC" stroke-width="0.6" opacity="0.17"/>
-  <line x1="480" y1="480" x2="700" y2="620" stroke="#F0E6CC" stroke-width="0.6" opacity="0.15"/>
-  <line x1="480" y1="480" x2="700" y2="644" stroke="#F0E6CC" stroke-width="0.6" opacity="0.13"/>
-  <line x1="480" y1="480" x2="700" y2="668" stroke="#F0E6CC" stroke-width="0.6" opacity="0.11"/>
-  <line x1="480" y1="480" x2="700" y2="692" stroke="#F0E6CC" stroke-width="0.6" opacity="0.09"/>
-  <line x1="480" y1="480" x2="680" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.07"/>
-  <line x1="480" y1="480" x2="620" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.06"/>
-  <line x1="480" y1="480" x2="560" y2="900" stroke="#F0E6CC" stroke-width="0.6" opacity="0.05"/>
-  <line x1="580" y1="520" x2="700" y2="540" stroke="#F0E6CC" stroke-width="0.5" opacity="0.16"/>
-  <line x1="580" y1="520" x2="700" y2="570" stroke="#F0E6CC" stroke-width="0.5" opacity="0.13"/>
-  <line x1="580" y1="520" x2="700" y2="600" stroke="#F0E6CC" stroke-width="0.5" opacity="0.10"/>
-  <line x1="480" y1="80" x2="700" y2="80" stroke="#F0E6CC" stroke-width="0.8" opacity="0.35"/>
+  <polygon points="280,80 480,80 480,480 280,480" fill="none" stroke="#F0E6CC" stroke-width="1.1" opacity="0.38"/>
+  <polygon points="380,120 580,120 580,520 380,520" fill="none" stroke="#F0E6CC" stroke-width="1.1" opacity="0.22"/>
+  <line x1="480" y1="480" x2="700" y2="500" stroke="#F0E6CC" stroke-width="0.5" opacity="0.22"/>
+  <line x1="480" y1="480" x2="700" y2="526" stroke="#F0E6CC" stroke-width="0.5" opacity="0.20"/>
+  <line x1="480" y1="480" x2="700" y2="552" stroke="#F0E6CC" stroke-width="0.5" opacity="0.18"/>
+  <line x1="480" y1="480" x2="700" y2="578" stroke="#F0E6CC" stroke-width="0.5" opacity="0.16"/>
+  <line x1="480" y1="480" x2="700" y2="604" stroke="#F0E6CC" stroke-width="0.5" opacity="0.14"/>
+  <line x1="480" y1="480" x2="700" y2="630" stroke="#F0E6CC" stroke-width="0.5" opacity="0.12"/>
+  <line x1="480" y1="480" x2="700" y2="656" stroke="#F0E6CC" stroke-width="0.5" opacity="0.10"/>
+  <line x1="480" y1="480" x2="680" y2="900" stroke="#F0E6CC" stroke-width="0.5" opacity="0.08"/>
+  <line x1="480" y1="480" x2="610" y2="900" stroke="#F0E6CC" stroke-width="0.5" opacity="0.06"/>
+  <line x1="580" y1="520" x2="700" y2="545" stroke="#F0E6CC" stroke-width="0.4" opacity="0.14"/>
+  <line x1="580" y1="520" x2="700" y2="578" stroke="#F0E6CC" stroke-width="0.4" opacity="0.11"/>
+  <line x1="580" y1="520" x2="700" y2="614" stroke="#F0E6CC" stroke-width="0.4" opacity="0.08"/>
+  <line x1="480" y1="80" x2="700" y2="80" stroke="#F0E6CC" stroke-width="0.7" opacity="0.32"/>
 </svg>
 """, unsafe_allow_html=True)
 
-# ─── Session state defaults ─────────────────────────────────────────────────
+# ─── Session state ───────────────────────────────────────────────────────────
 for key, default in {
     "thread": None,
     "collection": None,
@@ -278,11 +294,10 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ─── Layout: left content + right panel ─────────────────────────────────────
-left, right = st.columns([5, 2])
+# ─── Two-column layout ───────────────────────────────────────────────────────
+left, right = st.columns([5, 2], gap="large")
 
 with left:
-    # Hero
     st.markdown("""
 <p class="eyebrow">Document intelligence</p>
 <div class="hero-title">Hi, I'm<br><em>Sourcerer</em></div>
@@ -291,9 +306,8 @@ with left:
 <p class="hero-desc">Upload any PDF. Ask anything. Sourcerer finds the right passage, verifies the answer is grounded in the source, and streams it back with a confidence badge.</p>
 """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-    # ── File upload ──────────────────────────────────────────────────────────
     uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
     if uploaded_file is not None:
@@ -319,7 +333,6 @@ with left:
         )
 
         if not collection_ready and not thread_running and st.session_state.thread is None:
-
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(uploaded_file.getbuffer())
                 temp_path = tmp.name
@@ -341,11 +354,7 @@ with left:
                 finally:
                     os.unlink(path)
 
-            t = threading.Thread(
-                target=ingest_worker,
-                args=(temp_path, result_container),
-                daemon=True
-            )
+            t = threading.Thread(target=ingest_worker, args=(temp_path, result_container), daemon=True)
             t.start()
             st.session_state.thread = t
             st.rerun()
@@ -364,12 +373,11 @@ with left:
             st.rerun()
 
         elif st.session_state.ingest_error is not None:
-            st.error(f"❌ Failed to process PDF: {st.session_state.ingest_error}")
+            st.error(f"❌ {st.session_state.ingest_error}")
             st.stop()
 
         elif collection_ready:
             collection = st.session_state.collection
-
             all_data = collection.get(include=["documents"])
             chunks = all_data["documents"]
             bm25_index = build_bm25_index(chunks)
@@ -379,7 +387,6 @@ with left:
             question = st.text_input("Ask a question about the document")
 
             if question:
-
                 rewritten = rewrite_query(question, st.session_state.chat_history)
                 if rewritten != question:
                     st.caption(f"🔍 Interpreted as: *{rewritten}*")
@@ -397,11 +404,7 @@ with left:
 
                 st.markdown("### Answer")
 
-                if isinstance(context_chunks, list):
-                    context = "\n\n---\n\n".join(context_chunks)
-                else:
-                    context = context_chunks
-
+                context = "\n\n---\n\n".join(context_chunks) if isinstance(context_chunks, list) else context_chunks
                 prompt = (
                     "Answer the question using only the following context. "
                     "If the answer isn't in the context, say so clearly instead of guessing.\n\n"
@@ -410,7 +413,6 @@ with left:
                 )
 
                 streamed_text = st.write_stream(stream_llm(prompt))
-
                 verdict = check_grounding(rewritten, context_chunks, streamed_text)
 
                 if verdict == "SUPPORTED":
@@ -429,13 +431,11 @@ with left:
                         st.divider()
 
     else:
-        st.markdown('<p style="color:rgba(240,230,204,0.25);font-size:0.85rem;margin-top:0.25rem;">Upload a PDF to get started.</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:rgba(240,230,204,0.22);font-size:0.82rem;margin-top:0.2rem;">Upload a PDF to get started.</p>', unsafe_allow_html=True)
 
-# ─── Right panel: buttons + panels ──────────────────────────────────────────
+# ─── Right column ────────────────────────────────────────────────────────────
 with right:
-    st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-    
-    b1, b2 = st.columns(2)
+    b1, b2 = st.columns(2, gap="small")
     with b1:
         if st.button("⚡ Pipeline"):
             st.session_state.show_pipeline = not st.session_state.show_pipeline
@@ -445,114 +445,97 @@ with right:
             st.session_state.show_info = not st.session_state.show_info
             st.session_state.show_pipeline = False
 
-    # ── Info panel ───────────────────────────────────────────────────────────
     if st.session_state.show_info:
         st.markdown("""
-<div style="margin-top:16px;padding:16px;background:rgba(8,4,0,0.85);border:1px solid rgba(240,230,204,0.1);border-radius:10px;">
-<div class="info-section">
-  <h3>What it does</h3>
-  <p>Upload any PDF and ask questions. Sourcerer finds the most relevant passages, verifies grounding, and streams the answer with a confidence badge.</p>
-</div>
-<div class="info-section">
-  <h3>12 build stages</h3>
-  <ul>
-    <li><b style="color:rgba(240,230,204,0.8)">S0</b> — Basic RAG pipeline</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S1</b> — Baseline report card</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S2</b> — BM25 + RRF hybrid search</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S3</b> — Cross-encoder reranking</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S4</b> — HyDE query expansion</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S5</b> — LLM trust check</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S6</b> — Chroma vector DB</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S7</b> — Messy PDF handling</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S8</b> — Background threading</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S9</b> — Streaming answers</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S9.5</b> — Conversation memory</li>
-    <li><b style="color:rgba(240,230,204,0.8)">S10</b> — Deployed</li>
-  </ul>
-</div>
-<div class="info-section">
-  <h3>Stack</h3>
-  <span class="tech-pill">Python</span>
-  <span class="tech-pill">Streamlit</span>
-  <span class="tech-pill">Chroma</span>
-  <span class="tech-pill">BGE reranker</span>
-  <span class="tech-pill">BM25+RRF</span>
-  <span class="tech-pill">Gemini</span>
-</div>
+<div class="panel-card">
+  <div class="panel-label">About Sourcerer</div>
+  <div style="margin-bottom:10px">
+    <div class="info-row"><span class="info-stage">S0</span><span class="info-text">Basic RAG — parse, chunk, embed, retrieve</span></div>
+    <div class="info-row"><span class="info-stage">S1</span><span class="info-text">Baseline report card, 4 test sets</span></div>
+    <div class="info-row"><span class="info-stage">S2</span><span class="info-text">BM25 + vector hybrid + RRF fusion</span></div>
+    <div class="info-row"><span class="info-stage">S3</span><span class="info-text">Cross-encoder reranking (BGE)</span></div>
+    <div class="info-row"><span class="info-stage">S4</span><span class="info-text">HyDE query expansion (tested)</span></div>
+    <div class="info-row"><span class="info-stage">S5</span><span class="info-text">LLM-as-judge trust check</span></div>
+    <div class="info-row"><span class="info-stage">S6</span><span class="info-text">Chroma vector database</span></div>
+    <div class="info-row"><span class="info-stage">S7</span><span class="info-text">Messy PDF handling + guardrails</span></div>
+    <div class="info-row"><span class="info-stage">S8</span><span class="info-text">Background threading</span></div>
+    <div class="info-row"><span class="info-stage">S9</span><span class="info-text">Streaming answers</span></div>
+    <div class="info-row"><span class="info-stage">S9.5</span><span class="info-text">4-turn conversation memory</span></div>
+    <div class="info-row"><span class="info-stage">S10</span><span class="info-text">Deployed to Streamlit Cloud</span></div>
+  </div>
+  <div style="border-top:1px solid rgba(240,230,204,0.07);padding-top:10px">
+    <span class="tech-pill">Python</span>
+    <span class="tech-pill">Streamlit</span>
+    <span class="tech-pill">Chroma</span>
+    <span class="tech-pill">BGE reranker</span>
+    <span class="tech-pill">BM25+RRF</span>
+    <span class="tech-pill">Gemini</span>
+    <span class="tech-pill">MiniLM</span>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-    # ── Pipeline panel — monochrome vertical ─────────────────────────────────
     if st.session_state.show_pipeline:
         st.markdown("""
-<div style="margin-top:16px;padding:16px;background:rgba(8,4,0,0.85);border:1px solid rgba(240,230,204,0.1);border-radius:10px;">
-<p style="font-size:10px;font-weight:600;letter-spacing:0.12em;color:rgba(240,230,204,0.3);text-transform:uppercase;margin-bottom:12px">Pipeline</p>
-<svg width="100%" viewBox="0 0 200 640" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <marker id="va" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="5" markerHeight="5" orient="auto">
-      <path d="M2 2L5 8L8 2" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
-  </defs>
+<div class="panel-card">
+  <div class="panel-label">Pipeline</div>
+  <svg width="100%" viewBox="0 0 160 560" xmlns="http://www.w3.org/2000/svg">
 
-  <!-- INGEST label -->
-  <text x="100" y="18" text-anchor="middle" style="fill:rgba(240,230,204,0.25);font-size:8px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">INGEST</text>
+    <text x="80" y="14" text-anchor="middle" style="fill:rgba(240,230,204,0.2);font-size:7px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">INGEST</text>
 
-  <!-- PDF -->
-  <rect x="40" y="26" width="120" height="36" rx="6" fill="rgba(200,52,10,0.1)" stroke="rgba(200,52,10,0.4)" stroke-width="0.8"/>
-  <text x="100" y="40" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">PDF upload</text>
-  <text x="100" y="54" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">parse · chunk · embed</text>
+    <rect x="20" y="20" width="120" height="30" rx="5" fill="rgba(200,52,10,0.1)" stroke="rgba(200,52,10,0.35)" stroke-width="0.7"/>
+    <text x="80" y="32" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">PDF upload</text>
+    <text x="80" y="44" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">parse · chunk · embed</text>
 
-  <line class="pipe" x1="100" y1="63" x2="100" y2="83" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p1" x1="80" y1="51" x2="80" y2="68" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,66 80,74 84,66" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Chroma -->
-  <rect x="40" y="86" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="100" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Chroma</text>
-  <text x="100" y="114" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">vector store</text>
+    <rect x="20" y="76" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="88" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Chroma</text>
+    <text x="80" y="100" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">vector store</text>
 
-  <!-- Divider -->
-  <line x1="20" y1="142" x2="180" y2="142" stroke="rgba(240,230,204,0.08)" stroke-width="0.5" stroke-dasharray="3 3"/>
-  <text x="100" y="156" text-anchor="middle" style="fill:rgba(240,230,204,0.2);font-size:8px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">QUERY</text>
+    <line x1="20" y1="124" x2="140" y2="124" stroke="rgba(240,230,204,0.07)" stroke-width="0.5" stroke-dasharray="3 3"/>
+    <text x="80" y="136" text-anchor="middle" style="fill:rgba(240,230,204,0.18);font-size:7px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.1em">QUERY</text>
 
-  <!-- Question -->
-  <rect x="40" y="164" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="178" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Question</text>
-  <text x="100" y="192" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">user input</text>
+    <rect x="20" y="142" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="154" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Question</text>
+    <text x="80" y="166" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">user input</text>
 
-  <line class="pipe2" x1="100" y1="201" x2="100" y2="221" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p2" x1="80" y1="173" x2="80" y2="190" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,188 80,196 84,188" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Rewrite -->
-  <rect x="40" y="224" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="238" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Rewrite</text>
-  <text x="100" y="252" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">query expansion</text>
+    <rect x="20" y="198" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="210" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Rewrite</text>
+    <text x="80" y="222" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">query expansion</text>
 
-  <line class="pipe3" x1="100" y1="261" x2="100" y2="281" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p3" x1="80" y1="229" x2="80" y2="246" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,244 80,252 84,244" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Retrieve -->
-  <rect x="40" y="284" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="298" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Retrieve</text>
-  <text x="100" y="312" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">BM25 + vector + RRF</text>
+    <rect x="20" y="254" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="266" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Retrieve</text>
+    <text x="80" y="278" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">BM25 + vector + RRF</text>
 
-  <line class="pipe4" x1="100" y1="321" x2="100" y2="341" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p4" x1="80" y1="285" x2="80" y2="302" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,300 80,308 84,300" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Rerank -->
-  <rect x="40" y="344" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="358" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Rerank</text>
-  <text x="100" y="372" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">cross-encoder</text>
+    <rect x="20" y="310" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="322" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Rerank</text>
+    <text x="80" y="334" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">cross-encoder BGE</text>
 
-  <line class="pipe5" x1="100" y1="381" x2="100" y2="401" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p5" x1="80" y1="341" x2="80" y2="358" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,356 80,364 84,356" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Generate -->
-  <rect x="40" y="404" width="120" height="36" rx="6" fill="rgba(240,230,204,0.04)" stroke="rgba(240,230,204,0.18)" stroke-width="0.8"/>
-  <text x="100" y="418" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Gemini</text>
-  <text x="100" y="432" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">stream answer</text>
+    <rect x="20" y="366" width="120" height="30" rx="5" fill="rgba(240,230,204,0.03)" stroke="rgba(240,230,204,0.15)" stroke-width="0.7"/>
+    <text x="80" y="378" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Gemini</text>
+    <text x="80" y="390" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">stream answer</text>
 
-  <line class="pipe6" x1="100" y1="441" x2="100" y2="461" stroke="rgba(240,230,204,0.25)" stroke-width="1" fill="none" marker-end="url(#va)"/>
+    <line class="p6" x1="80" y1="397" x2="80" y2="414" stroke="rgba(240,230,204,0.22)" stroke-width="0.8"/>
+    <polygon points="76,412 80,420 84,412" fill="rgba(240,230,204,0.22)"/>
 
-  <!-- Trust + Answer -->
-  <rect x="40" y="464" width="120" height="36" rx="6" fill="rgba(200,52,10,0.08)" stroke="rgba(200,52,10,0.3)" stroke-width="0.8"/>
-  <text x="100" y="478" text-anchor="middle" style="fill:rgba(240,230,204,0.85);font-size:11px;font-family:Inter,sans-serif;font-weight:600">Answer</text>
-  <text x="100" y="492" text-anchor="middle" style="fill:rgba(240,230,204,0.3);font-size:9px;font-family:Inter,sans-serif">trust check · confidence</text>
+    <rect x="20" y="422" width="120" height="30" rx="5" fill="rgba(200,52,10,0.08)" stroke="rgba(200,52,10,0.28)" stroke-width="0.7"/>
+    <text x="80" y="434" text-anchor="middle" style="fill:rgba(240,230,204,0.82);font-size:10px;font-family:Inter,sans-serif;font-weight:600">Answer</text>
+    <text x="80" y="446" text-anchor="middle" style="fill:rgba(240,230,204,0.28);font-size:8px;font-family:Inter,sans-serif">trust check · confidence</text>
 
-</svg>
+  </svg>
 </div>
 """, unsafe_allow_html=True)
