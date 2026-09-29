@@ -86,8 +86,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     font-size: 0.95rem;
     color: rgba(240,230,204,0.45);
     margin-bottom: 8px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em
 }
 .hero-desc {
     font-size: 12.5px;
