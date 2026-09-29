@@ -102,7 +102,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 [data-testid="stButton"] button {
     background: transparent !important;
     border: 1px solid rgba(240,230,204,0.2) !important;
-    border-radius: 999px !important;
+    border-radius: 500px !important;
     color: #F0E6CC !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
@@ -338,7 +338,7 @@ with left:
 
             ok, error_msg = check_file_limits(temp_path)
             if not ok:
-                st.error(f"❌ {error_msg}")
+                st.error(f"{error_msg}")
                 os.unlink(temp_path)
                 st.stop()
 
@@ -372,7 +372,7 @@ with left:
             st.rerun()
 
         elif st.session_state.ingest_error is not None:
-            st.error(f"❌ {st.session_state.ingest_error}")
+            st.error(f"{st.session_state.ingest_error}")
             st.stop()
 
         elif collection_ready:
@@ -381,7 +381,7 @@ with left:
             chunks = all_data["documents"]
             bm25_index = build_bm25_index(chunks)
 
-            st.success(f"✅ {len(chunks)} chunks loaded from {uploaded_file.name}")
+            st.success(f"{len(chunks)} chunks loaded from {uploaded_file.name}")
 
             question = st.text_input("Ask a question about the document")
 
@@ -436,7 +436,7 @@ with left:
 with right:
     b1, b2 = st.columns(2, gap="small")
     with b1:
-        if st.button("⚡ Pipeline"):
+        if st.button("Pipeline"):
             st.session_state.show_pipeline = not st.session_state.show_pipeline
             st.session_state.show_info = False
     with b2:
