@@ -410,7 +410,16 @@ with left:
                     f"Question: {rewritten}"
                 )
 
-                streamed_text = st.write_stream(stream_llm(prompt))
+                try:
+                    streamed_text = st.write_stream(stream_llm(prompt))
+                except Exception as e:
+                    st.error(
+                        "Sourcerer couldn't generate an answer right now. "
+                        "The Gemini service returned an error. Please try again."
+                    )
+                    st.caption(f"Error: {type(e).__name__}")
+                    st.stop()
+                
                 verdict = check_grounding(rewritten, context_chunks, streamed_text)
 
                 if verdict == "SUPPORTED":
