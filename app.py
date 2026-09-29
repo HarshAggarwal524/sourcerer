@@ -83,7 +83,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 .hero-tagline {
     font-family: 'Playfair Display', serif;
-    font-style: italic;
     font-size: 0.95rem;
     color: rgba(240,230,204,0.45);
     margin-bottom: 8px;
